@@ -14,14 +14,15 @@ This section covers the AWS network I built for the lab before deploying the Win
 
 ### VPC
 
-<!-- IMAGE PLACEHOLDER: add the redacted VPC screenshot here as `vpc.png`. -->
+<!--<img width="1089" height="516" alt="First VPC" src="https://github.com/user-attachments/assets/ddf7b140-af12-40a0-bb6a-a0b5c508eb9d" />
+ -->
 
 ### Subnet
 
-<!-- IMAGE PLACEHOLDER: add the redacted subnet screenshot here as `subnet.png`. -->
+<!-- <img width="1060" height="173" alt="Route Table" src="https://github.com/user-attachments/assets/4fa9021c-d8e0-4133-9ac4-288d7feae8bc" />
+ -->
 
 ### Route Table
 
-<!-- IMAGE PLACEHOLDER: add the redacted route table screenshot here as `route-table.png`. -->
+<!-- <img width="1109" height="568" alt="Subnet 1" src="https://github.com/user-attachments/assets/f85b4454-7376-4d2d-92e3-4751a60313e0" /> -->
 
-The screenshots are meant to support the written explanation, so each image will sit next to the configuration it proves rather than being placed in a separate screenshot dump.
