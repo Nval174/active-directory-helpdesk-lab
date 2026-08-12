@@ -73,12 +73,12 @@ I have AWS credits available, but I don't want to burn through them just for a l
 
 ## Documentation
 
+- [AWS Networking](aws-networking/README.md)
 - [Architecture](documentation/architecture.md)
 - [Build Notes](documentation/build-notes.md)
 - [Lessons Learned](documentation/lessons-learned.md)
 - [Help Desk Tickets](tickets/README.md)
 - [PowerShell](powershell/README.md)
-- [Screenshot Guidelines](screenshots/README.md)
 
 ## Credit to the Original Project
 
