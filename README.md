@@ -1,38 +1,34 @@
 # Active Directory Help Desk Lab
 
-A hands-on Active Directory and Windows help desk lab built in AWS for learning and portfolio development.
+I'm building this lab to get more hands-on experience with Windows administration, Active Directory, networking, and the kinds of troubleshooting a help desk technician would actually run into. I'm also using it to build a stronger foundation for cybersecurity.
 
-## Project Overview
+This project was inspired by a public Active Directory AWS lab by Zackary R. I'm rebuilding the environment myself, documenting what I learn along the way, and planning to add my own help desk scenarios and security-focused exercises.
 
-This project is inspired by a publicly available Active Directory AWS lab and is being independently rebuilt, documented, and expanded to demonstrate practical IT and cybersecurity fundamentals.
+## What I'm Trying to Learn
 
-The lab will simulate a small business environment with a Windows Server domain controller and a domain-joined Windows client. The project will focus on common help desk and identity-management tasks such as user onboarding, account troubleshooting, Group Policy, permissions, and PowerShell administration.
+- How AWS networking works in practice
+- Windows Server administration
+- Active Directory and DNS
+- Creating and managing users, groups, and OUs
+- Group Policy
+- Common help desk troubleshooting
+- PowerShell administration and automation
+- Basic identity and access management concepts
+- How to document technical work clearly
 
-## Goals
+## Where I'm At
 
-- Build an Active Directory environment in AWS
-- Understand AWS networking and Windows Server administration
-- Practice common help desk workflows
-- Learn user, group, and Organizational Unit management
-- Practice Group Policy administration
-- Use PowerShell for Windows administration and automation
-- Document troubleshooting and ticket-resolution workflows
-- Develop evidence-based technical documentation for a cybersecurity portfolio
+**Current status: AWS network foundation is complete.**
 
-## Current Progress
+So far I've built the basic network for the lab in AWS US East (N. Virginia):
 
-**Status: AWS network foundation complete.**
-
-The initial AWS network has been created and documented:
-
-- AWS Region: `us-east-1` (US East — N. Virginia)
-- VPC: `AD-Helpdesk-Lab-VPC` (`10.0.0.0/16`)
-- Subnet: `AD-Helpdesk-Public-Subnet` (`10.0.0.0/20`)
+- VPC: `AD-Helpdesk-Lab-VPC` — `10.0.0.0/16`
+- Subnet: `AD-Helpdesk-Public-Subnet` — `10.0.0.0/20`
 - Internet Gateway: `AD-Helpdesk-IGW`
 - Route table: `AD-Helpdesk-Public-RT`
 - Default route: `0.0.0.0/0` → Internet Gateway
 
-Windows Server instances and Active Directory have **not** yet been deployed.
+I haven't deployed the Windows machines or Active Directory yet. I'm building the environment in stages so I can understand what each part does instead of just following a tutorial and moving on.
 
 ## Current Architecture
 
@@ -51,21 +47,29 @@ AWS us-east-1
             └── 0.0.0.0/0 → AD-Helpdesk-IGW
 ```
 
-## Planned Lab Systems
+## What's Coming Next
+
+The next part of the build is securing the network and preparing it for the Windows Server instances.
+
+Eventually the lab will include:
 
 | Host | Role | Status |
 |---|---|---|
 | DC01 | Windows Server / Domain Controller / DNS | Not deployed |
 | CLIENT01 | Windows client / domain-joined workstation | Not deployed |
 
-## Planned Help Desk Scenarios
+I'll then use the environment to work through realistic help desk situations such as:
 
 - New user onboarding
-- Password reset and account unlock
-- Group and access management
+- Password resets and account unlocks
+- Group and access changes
 - Group Policy troubleshooting
-- Domain-join troubleshooting
-- Basic Windows client troubleshooting
+- Domain-join problems
+- Basic Windows troubleshooting
+
+## Keeping Costs Down
+
+I have AWS credits available, but I don't want to burn through them just for a lab. I'll keep an eye on potentially billable resources, avoid leaving compute running when I'm not using it, and review costs before adding anything significant.
 
 ## Documentation
 
@@ -76,10 +80,6 @@ AWS us-east-1
 - [PowerShell](powershell/README.md)
 - [Screenshot Guidelines](screenshots/README.md)
 
-## Cost Management
+## Credit to the Original Project
 
-The lab is being built with cost minimization as a priority. AWS credits are available, but resources will not be left running unnecessarily. Potentially billable resources will be reviewed before deployment and shut down or removed when they are no longer needed.
-
-## Attribution
-
-This project is independently implemented for educational purposes and was inspired by the publicly available `active-directory-aws-lab` project by Zackary R. The implementation, configuration, documentation, screenshots, and future enhancements in this repository are my own work.
+This project was inspired by the publicly available `active-directory-aws-lab` project by Zackary R. The lab I'm building here is my own implementation, configuration, documentation, screenshots, and future additions.
