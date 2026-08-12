@@ -11,7 +11,7 @@ The lab will simulate a small business environment with a Windows Server domain 
 ## Goals
 
 - Build an Active Directory environment in AWS
-- Understand Windows Server and domain administration
+- Understand AWS networking and Windows Server administration
 - Practice common help desk workflows
 - Learn user, group, and Organizational Unit management
 - Practice Group Policy administration
@@ -19,13 +19,46 @@ The lab will simulate a small business environment with a Windows Server domain 
 - Document troubleshooting and ticket-resolution workflows
 - Develop evidence-based technical documentation for a cybersecurity portfolio
 
-## Lab Architecture
+## Current Progress
 
-Architecture documentation and diagrams will be added as the environment is built.
+**Status: AWS network foundation complete.**
 
-## Help Desk Scenarios
+The initial AWS network has been created and documented:
 
-Planned scenarios include:
+- AWS Region: `us-east-1` (US East — N. Virginia)
+- VPC: `[lab network resource]` (`[redacted address]`)
+- Subnet: `[lab network resource]` (`[redacted address]`)
+- Internet Gateway: `[lab network resource]`
+- Route table: `[lab network resource]`
+- Default route: `[redacted address]` → Internet Gateway
+
+Windows Server instances and Active Directory have **not** yet been deployed.
+
+## Current Architecture
+
+```text
+AWS us-east-1
+└── [lab network resource]
+    │   [redacted address]
+    │
+    ├── [lab network resource]
+    │
+    └── [lab network resource]
+        │   [redacted address]
+        │
+        └── [lab network resource]
+            ├── [redacted address] → local
+            └── [redacted address] → [lab network resource]
+```
+
+## Planned Lab Systems
+
+| Host | Role | Status |
+|---|---|---|
+| directory server | Windows Server / Domain Controller / DNS | Not deployed |
+| Windows client | Windows client / domain-joined workstation | Not deployed |
+
+## Planned Help Desk Scenarios
 
 - New user onboarding
 - Password reset and account unlock
@@ -39,12 +72,13 @@ Planned scenarios include:
 - [Architecture](documentation/architecture.md)
 - [Build Notes](documentation/build-notes.md)
 - [Lessons Learned](documentation/lessons-learned.md)
+- [Help Desk Tickets](tickets/README.md)
+- [PowerShell](powershell/README.md)
+- [Screenshot Guidelines](screenshots/README.md)
 
-## Project Status
+## Cost Management
 
-**Status:** Initial setup — lab not yet deployed.
-
-The repository will be updated incrementally as each component is built and verified.
+The lab is being built with cost minimization as a priority. AWS credits are available, but resources will not be left running unnecessarily. Potentially billable resources will be reviewed before deployment and shut down or removed when they are no longer needed.
 
 ## Attribution
 
