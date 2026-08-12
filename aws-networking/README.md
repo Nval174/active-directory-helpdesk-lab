@@ -12,17 +12,22 @@ This section covers the AWS network I built for the lab before deploying the Win
 
 ## Evidence
 
+These screenshots show the network configuration I completed in AWS. I removed or covered sensitive information before adding them to this public repository.
+
 ### VPC
 
-<!--<img width="1089" height="516" alt="First VPC" src="https://github.com/user-attachments/assets/ddf7b140-af12-40a0-bb6a-a0b5c508eb9d" />
- -->
+The VPC is the main network boundary for the lab and uses the `[redacted address]` address space.
+
+![VPC configuration](network-vpc.png)
 
 ### Subnet
 
-<!-- <img width="1060" height="173" alt="Route Table" src="https://github.com/user-attachments/assets/4fa9021c-d8e0-4133-9ac4-288d7feae8bc" />
- -->
+The public subnet uses `[redacted address]` and is associated with the lab VPC.
+
+![Subnet configuration](network-subnet.png)
 
 ### Route Table
 
-<!-- <img width="1109" height="568" alt="Subnet 1" src="https://github.com/user-attachments/assets/f85b4454-7376-4d2d-92e3-4751a60313e0" /> -->
+The route table contains the local VPC route and the default route to the Internet Gateway.
 
+![Route table configuration](network-route-table.png)
