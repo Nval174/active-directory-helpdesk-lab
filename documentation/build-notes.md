@@ -20,9 +20,7 @@ The VPC is the main network boundary for the lab. A `/16` gives me plenty of roo
 
 ### Evidence
 
-> **Image placeholder — VPC screenshot**
->
-> Place the redacted VPC screenshot here as `../aws-networking/vpc.png`.
+![VPC configuration](../aws-networking/network-vpc.png)
 
 ## Milestone 2 — Public Subnet
 
@@ -39,9 +37,7 @@ A subnet is a smaller section of the VPC's address space. The `/20` subnet sits 
 
 ### Evidence
 
-> **Image placeholder — Subnet screenshot**
->
-> Place the redacted subnet screenshot here as `../aws-networking/subnet.png`.
+![Subnet configuration](../aws-networking/network-subnet.png)
 
 ## Milestone 3 — Internet Gateway
 
@@ -72,9 +68,7 @@ The local route lets resources in the VPC communicate with each other. The `[red
 
 ### Evidence
 
-> **Image placeholder — Route table screenshot**
->
-> Place the redacted route table screenshot here as `../aws-networking/network-route-table.png`.
+![Route table configuration](../aws-networking/network-route-table.png)
 
 ## Current Network
 
