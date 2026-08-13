@@ -2,7 +2,7 @@
 
 I'm building this lab to get more hands-on experience with Windows administration, Active Directory, networking, and the kinds of troubleshooting a help desk technician would actually run into. I'm also using it to build a stronger foundation for cybersecurity.
 
-This project was inspired by a public Active Directory AWS lab by Zackary R. I'm rebuilding the environment myself, documenting what I learn along the way, and planning to add my own help desk scenarios and security-focused exercises.
+This project was inspired by a public Active Directory AWS lab by Zackary R. I'm rebuilding the environment myself, documenting what I learn along the way, and adding my own help desk scenarios and security-focused exercises.
 
 ## What I'm Trying to Learn
 
@@ -18,17 +18,30 @@ This project was inspired by a public Active Directory AWS lab by Zackary R. I'm
 
 ## Where I'm At
 
-**Current status: AWS network foundation is complete.**
+**Current status: Core Active Directory help desk lab is working.**
 
-So far I've built the basic network for the lab in AWS US East (N. Virginia):
+I've built the AWS network, deployed the Windows servers, created the `[lab domain]` Active Directory domain, joined Windows client to the domain, configured a workstation Group Policy, and completed my first help desk scenario.
 
+### AWS network
+
+- Region: US East (N. Virginia) (`us-east-1`)
 - VPC: `[lab network resource]` — `[redacted address]`
-- Subnet: `[lab network resource]` — `[redacted address]`
+- Initial public subnet: `[lab network resource]` — `[redacted address]`
+- Compute subnet: `[lab network resource]` — `[redacted address]`
 - Internet Gateway: `[lab network resource]`
-- Route table: `[lab network resource]`
+- Public route table: `[lab network resource]`
 - Default route: `[redacted address]` → Internet Gateway
 
-I haven't deployed the Windows machines or Active Directory yet. I'm building the environment in stages so I can understand what each part does instead of just following a tutorial and moving on.
+### Windows / Active Directory
+
+| Host | Role | Status |
+|---|---|---|
+| directory server | Windows Server / Domain Controller / DNS | Complete |
+| Windows client | Domain-joined workstation | Complete |
+
+Domain: `[lab domain]`
+
+The lab currently includes fictional users and groups, a `[workstation policy or OU]` OU, a workstation computer GPO, and a working RDP/domain-authentication workflow.
 
 ## Current Architecture
 
@@ -39,26 +52,36 @@ AWS us-east-1
     │
     ├── [lab network resource]
     │
+    ├── [lab network resource]
+    │   └── [redacted address]
+    │
     └── [lab network resource]
-        │   [redacted address]
-        │
-        └── [lab network resource]
-            ├── [redacted address] → local
-            └── [redacted address] → [lab network resource]
+        └── [redacted address]
+            │
+            ├── directory server
+            │   ├── Active Directory Domain Services
+            │   ├── DNS
+            │   └── [lab domain]
+            │
+            └── Windows client
+                └── Joined to [lab domain]
 ```
 
-## What's Coming Next
+## What I've Done So Far
 
-The next part of the build is securing the network and preparing it for the Windows Server instances.
+I've worked through several real troubleshooting situations instead of only building the environment:
 
-Eventually the lab will include:
+- Launched Windows Server instances and worked around an EC2 Availability Zone/instance-type issue.
+- Configured Windows client to use directory server for DNS.
+- Troubleshot `nltest /dsgetdc:[lab domain]` returning `ERROR_NO_SUCH_DOMAIN` even though DNS resolution worked.
+- Tested the Active Directory connectivity needed between Windows client and directory server and corrected the AWS security-group rules.
+- Joined Windows client to `[lab domain]` and verified domain authentication with the lab employee.
+- Created `[workstation policy or OU]` and verified that the computer-side GPO applies to Windows client.
+- Created and resolved an account-lockout scenario for the lab employee.
 
-| Host | Role | Status |
-|---|---|---|
-| directory server | Windows Server / Domain Controller / DNS | Not deployed |
-| Windows client | Windows client / domain-joined workstation | Not deployed |
+## Help Desk Scenarios
 
-I'll then use the environment to work through realistic help desk situations such as:
+The lab will continue to grow with realistic support situations such as:
 
 - New user onboarding
 - Password resets and account unlocks
@@ -69,7 +92,7 @@ I'll then use the environment to work through realistic help desk situations suc
 
 ## Keeping Costs Down
 
-I have AWS credits available, but I don't want to burn through them just for a lab. I'll keep an eye on potentially billable resources, avoid leaving compute running when I'm not using it, and review costs before adding anything significant.
+I have AWS credits available for this project, but I don't want to burn through them just for a lab. I'm using smaller instance resources where practical, watching for potentially billable resources, and avoiding leaving compute running when I'm not using it.
 
 ## Documentation
 
@@ -77,9 +100,10 @@ I have AWS credits available, but I don't want to burn through them just for a l
 - [Architecture](documentation/architecture.md)
 - [Build Notes](documentation/build-notes.md)
 - [Lessons Learned](documentation/lessons-learned.md)
+- [Evidence Notes](documentation/evidence-notes.md)
 - [Help Desk Tickets](tickets/README.md)
 - [PowerShell](powershell/README.md)
 
 ## Credit to the Original Project
 
-This project was inspired by the publicly available `active-directory-aws-lab` project by Zackary R. The lab I'm building here is my own implementation, configuration, documentation, screenshots, and future additions.
+This project was inspired by the publicly available `active-directory-aws-lab` project by Zackary R. The lab I'm building here is my own implementation, configuration, documentation, screenshots, troubleshooting, and future additions.
