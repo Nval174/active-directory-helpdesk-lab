@@ -1,13 +1,25 @@
 # Evidence Notes
 
-I'm adding screenshots when I finish a meaningful part of the lab, not saving every single click. The idea is for each image to prove something useful about the setup.
+I'm adding screenshots when I finish a meaningful part of the lab, not saving every single click. The point of each image is to prove something useful about the setup or troubleshooting process.
 
-For the AWS networking phase, the screenshots are stored alongside the networking documentation:
+## Screenshot Storage
 
-- VPC screenshot → `aws-networking/VPC.png`
-- Subnet screenshot → `aws-networking/Subnet.png`
-- Route table screenshot → `aws-networking/route-table.png`
+The screenshots I've collected so far are stored in the repository's `pictures/` directory. I am keeping the image collection together for now and will organize it further after the major lab phases are complete.
 
-Before adding future screenshots to this public repository, I'll make sure they don't contain credentials, private keys, access tokens, personal information, or other sensitive data.
+The AWS networking documentation also contains the original VPC, subnet, and route-table images directly in `aws-networking/`.
 
-For later phases, I'll use the same approach. For example, a screenshot showing that a server became a domain controller is more useful than a screenshot of every wizard page used to install it.
+## What I Keep
+
+I want the screenshots to show useful evidence such as:
+
+- A completed configuration
+- A successful verification
+- A problem I actually encountered
+- A troubleshooting result
+- A final working state
+
+For example, the CLIENT01 DNS/domain-controller troubleshooting screenshots are useful because they show the problem, the investigation, and the successful result.
+
+## Sensitive Information
+
+Before adding screenshots to the repository, I check for passwords, private keys, access tokens, personal information, and other information that should not be shared. The screenshots currently in the repository have been reviewed and sensitive information was covered before upload.
