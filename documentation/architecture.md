@@ -2,20 +2,21 @@
 
 ## Purpose
 
-This document describes the architecture of the Active Directory help desk lab as it is built and verified.
+This document describes the architecture I've built and verified for the Active Directory help desk lab.
 
 ## Current Environment
 
-The lab is being built in AWS US East (N. Virginia), `us-east-1`.
+The lab is running in AWS US East (N. Virginia), `us-east-1`.
 
 ### Network
 
 | Component | Configuration | Status |
 |---|---|---|
 | VPC | `[lab network resource]` / `[redacted address]` | Complete |
+| Initial public subnet | `[lab network resource]` / `[redacted address]` | Complete |
+| Compute subnet | `[lab network resource]` / `[redacted address]` | Complete |
 | Internet Gateway | `[lab network resource]` | Complete |
-| Subnet | `[lab network resource]` / `[redacted address]` | Complete |
-| Route Table | `[lab network resource]` | Complete |
+| Public route table | `[lab network resource]` | Complete |
 
 ### Current Routing
 
@@ -24,6 +25,17 @@ Destination       Target
 [redacted address]       local
 [redacted address]         [lab network resource]
 ```
+
+The compute subnet uses the same route table.
+
+## Current Systems
+
+| Host | Role | Private IP | Status |
+|---|---|---|---|
+| directory server | Windows Server / Domain Controller / DNS | `[redacted address]` | Complete |
+| Windows client | Domain-joined workstation | Assigned by AWS | Complete |
+
+Active Directory domain: `[lab domain]`
 
 ## Current Architecture
 
@@ -34,40 +46,59 @@ AWS us-east-1
     │
     ├── [lab network resource]
     │
+    ├── [lab network resource]
+    │   └── [redacted address]
+    │
     └── [lab network resource]
-        │   [redacted address]
-        │
-        └── [lab network resource]
-            ├── [redacted address] → local
-            └── [redacted address] → [lab network resource]
+        └── [redacted address]
+            │
+            ├── directory server
+            │   ├── Active Directory Domain Services
+            │   ├── DNS
+            │   └── [lab domain]
+            │
+            └── Windows client
+                └── Domain member
 ```
 
-## Planned Systems
+## Active Directory Structure
 
-The following systems have not yet been deployed:
+```text
+[lab domain]
+├── [user OU]
+│   ├── Employees
+│   │   ├── the lab employee
+│   │   └── another lab employee
+│   ├── HelpDesk
+│   └── IT
+│       └── the support employee
+├── [group OU]
+│   ├── Employees
+│   ├── [support role]
+│   │   └── the support employee
+│   └── [IT role]
+├── [workstation policy or OU]
+│   └── Windows client
+└── Domain Controllers
+    └── directory server
+```
 
-| Host | Planned Role | Status |
-|---|---|---|
-| directory server | Windows Server / Domain Controller / DNS | Not deployed |
-| Windows client | Windows client / domain-joined workstation | Not deployed |
+## Group Policy
 
-## Planned Active Directory Services
-
-After the AWS network is verified, the lab will be expanded to include:
-
-- Active Directory Domain Services (AD DS)
-- DNS
-- Domain users and groups
-- Organizational Units (OUs)
-- Group Policy
-- Windows client domain joining
-- Help desk troubleshooting scenarios
-- PowerShell administration
+I've created a computer-side GPO named `[workstation policy or OU]` and linked it to the `[workstation policy or OU]` OU. I verified that it applies to Windows client using `gpresult` from an elevated administrative command prompt.
 
 ## Security Boundary
 
-The Internet Gateway provides network connectivity but does not itself determine which inbound traffic is permitted to the Windows systems. Security groups will be configured before the EC2 instances are deployed so that administrative and required application traffic is deliberately restricted.
+The Internet Gateway provides network connectivity, but security groups determine which inbound traffic is allowed. For the current lab configuration, the directory server security group uses the Windows client security group as the source for the broad TCP rule used to establish Active Directory connectivity. This keeps the rule limited to the lab client instead of exposing it to the internet.
 
-## Future Documentation
+RDP access is restricted to my public IP.
 
-An original architecture diagram and final system addressing information will be added after the environment is deployed and verified.
+I plan to review and tighten the broader TCP rule during a later hardening phase.
+
+## Troubleshooting
+
+Before joining Windows client to the domain, I was able to resolve directory server through DNS but `nltest /dsgetdc:[lab domain]` returned `ERROR_NO_SUCH_DOMAIN` (1355). DNS and AD health checks on directory server passed, while the required client-to-DC connectivity was not initially available. After correcting the security-group rules, the required connectivity tests succeeded and Windows client was able to discover directory server.
+
+## Next
+
+I'll continue expanding the lab with more help desk scenarios, administrative tasks, PowerShell work, and later security hardening.
