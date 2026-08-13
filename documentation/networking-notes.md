@@ -1,16 +1,16 @@
 # Networking Notes
 
-This file captures a few of the networking ideas that stood out to me while building the AWS side of the lab.
+These are the networking ideas that stood out to me while building the AWS side of the lab.
 
 ## VPC vs. Subnet
 
 The VPC is the main network boundary for the lab and uses `[redacted address]`.
 
-The subnet is a smaller section inside that VPC. I used `[redacted address]` for the initial public subnet.
+The first subnet I created uses `[redacted address]`. I later created `[redacted address]` as a separate compute subnet for the Windows instances.
 
 ## CIDR
 
-The `/16` and `/20` prefixes control how large each IPv4 network is. The `/20` subnet fits inside the `/16` VPC address space.
+The `/16` and `/20` prefixes determine the size of the IPv4 networks. Understanding those ranges helped me verify that directory server's `[redacted address]` address belongs to the `[redacted address]` compute subnet.
 
 ## Internet Gateway
 
@@ -25,10 +25,10 @@ The public route table currently has:
 
 The local route handles traffic inside the VPC. The `[redacted address]` route is the default IPv4 route for destinations outside the VPC.
 
-## Public Subnet
+## Public Subnet and Compute Subnet
 
-The subnet is configured to automatically assign public IPv4 addresses. This will make remote administration possible later, but the EC2 security groups will still need to restrict which inbound traffic is allowed.
+I enabled automatic public IPv4 assignment on the subnets used by the lab so I can remotely administer the Windows systems. The EC2 security groups are what limit which inbound traffic is actually allowed.
 
 ## Security and Cost
 
-I'm treating internet access as something that needs to be controlled rather than assumed to be safe. Before launching the Windows servers, I'll set up security group rules deliberately and keep the AWS resources as small and short-lived as practical.
+I'm treating internet access as something that needs to be controlled rather than assumed to be safe. I keep administrative access restricted to the traffic the lab actually needs, and I keep the AWS resources as small and short-lived as practical so I don't burn through credits unnecessarily.
