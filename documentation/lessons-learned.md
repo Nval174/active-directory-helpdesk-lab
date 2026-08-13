@@ -1,39 +1,57 @@
 # Lessons Learned
 
-This document captures technical concepts, mistakes, troubleshooting discoveries, and practical lessons learned throughout the lab.
+This is where I'm keeping the technical lessons that have stood out to me while building and troubleshooting the lab.
 
 ## AWS Networking
 
 ### VPC vs. Subnet
 
-A VPC provides the overall network boundary and address space for the AWS lab. The lab VPC uses `10.0.0.0/16`.
+I learned that the VPC is the main network boundary for the lab, while subnets divide that address space into smaller networks. My VPC uses `10.0.0.0/16` and my initial public subnet uses `10.0.0.0/20`.
 
-A subnet is a smaller network segment inside the VPC. The lab uses `10.0.0.0/20` for the initial public subnet.
+I later created a second subnet, `10.0.16.0/20`, for the Windows compute instances after the first Availability Zone did not support the instance configuration I was trying to use.
 
 ### CIDR Notation
 
-The `/16` and `/20` prefixes determine the size of the corresponding IPv4 network. The `/20` subnet is contained within the `/16` VPC address space.
+The `/16` and `/20` prefixes determine the size of the IPv4 networks. Understanding the ranges helped me recognize that DC01's address, `10.0.22.196`, was valid inside the `10.0.16.0/20` compute subnet.
 
-### Internet Gateway
+### Internet Gateway and Route Tables
 
-An Internet Gateway provides a path between a VPC and the internet. Attaching an Internet Gateway to the VPC does not by itself make every resource publicly accessible; routing and security controls still determine how traffic can flow.
+I learned that an Internet Gateway provides a path between the VPC and the internet, while the route table determines where traffic is sent. The default route `0.0.0.0/0` points to the Internet Gateway, while the local route handles traffic inside the VPC.
 
-### Route Tables
+### Security Groups
 
-A route table determines where traffic from an associated subnet is directed. The lab's public route table contains a local route for the VPC and a default IPv4 route (`0.0.0.0/0`) pointing to the Internet Gateway.
+I learned that connectivity problems can come from more than one layer. In this lab, DNS could work while other Active Directory traffic was blocked. Testing the required ports helped me identify that the DC01 security group needed additional access from the CLIENT01 security group.
 
-### Public Subnet
+I deliberately kept the source limited to the CLIENT01 security group instead of opening the Active Directory traffic to the public internet. I also learned that a broad rule can be useful during a lab build, but it should be reviewed and tightened during hardening.
 
-For this lab, the subnet is configured to automatically assign public IPv4 addresses. This will support remote administration of the lab systems, while security groups will later be used to restrict inbound traffic.
+## Active Directory and DNS
 
-## Security Considerations
+### DNS Matters to Active Directory
 
-A network having internet connectivity does not mean that all traffic should be allowed. Before Windows Server instances are deployed, the lab will use restrictive security group rules and only expose the traffic required for administration and lab functionality.
+One of the biggest lessons so far has been how much Active Directory depends on DNS. CLIENT01 could resolve the domain controller, but that alone was not enough for domain-controller discovery.
+
+### Troubleshooting `nltest`
+
+Before joining CLIENT01 to the domain, `nslookup` could resolve DC01 but `nltest /dsgetdc:corp.local` returned `ERROR_NO_SUCH_DOMAIN` (1355).
+
+I checked the DNS service, confirmed the `corp.local` zone existed, verified the Active Directory DNS records, checked Netlogon, ran the DNS diagnostic on DC01, and tested the required connectivity from CLIENT01. The issue was ultimately tied to missing client-to-DC connectivity in the AWS security group. After correcting the rules, the connectivity tests succeeded and `nltest` was able to find DC01.
+
+That was a useful reminder that troubleshooting should move through the layers instead of assuming that a successful DNS lookup means the entire Active Directory connection is healthy.
+
+## Group Policy
+
+I learned that the computer and the user are separate policy targets. `Lab-Workstations-Baseline` is a computer-side GPO linked to the `Lab-Workstations` OU, so it applies to CLIENT01 rather than directly to John Smith.
+
+I also learned that the computer object has to be in the OU where the GPO is linked. CLIENT01 initially wasn't in that OU, so the policy did not appear in the computer results until I moved it and refreshed Group Policy.
+
+## Help Desk / Troubleshooting
+
+The first account-lockout scenario helped me practice a simple support workflow: confirm the user's account state, identify the likely cause, make the smallest administrative change needed, and verify that the user can log in again.
 
 ## Cost Management
 
-AWS credits are available for the lab, but minimizing unnecessary spending is a project requirement. Compute and other potentially billable resources will be reviewed before deployment, and resources will not be left running unnecessarily.
+I'm keeping the AWS lab small because I want the project to stay useful without spending credits unnecessarily. I'm using smaller instances where practical and plan to stop resources when I'm done working with them.
 
-## Documentation Practice
+## Documentation
 
-Screenshots are being collected at meaningful verification points rather than documenting every click. Screenshots will be reviewed for sensitive information before being added to the public GitHub repository.
+I'm keeping screenshots at meaningful verification points rather than capturing every click. I also review screenshots before adding them to the repository so I don't accidentally publish credentials or other sensitive information.
