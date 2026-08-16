@@ -60,9 +60,7 @@ The domain controller was configured with the private IPv4 address `[redacted ad
 
 ### Security group note
 
-The directory server security group uses the Windows client security group as the source for the broad inbound TCP rule used during the lab. This keeps the rule scoped to the lab client rather than exposing it to the internet.
-
-I plan to review and tighten the rule set during a later hardening phase rather than changing working connectivity in the middle of the build.
+The directory server security group uses the Windows client security group as the source for the broad inbound TCP rule used during the lab. This keeps the rule scoped to the lab client rather than exposing it to the internet. I plan to review and tighten the rule set during a later hardening phase.
 
 ## Milestone 4 — Active Directory and DNS
 
@@ -70,7 +68,7 @@ I plan to review and tighten the rule set during a later hardening phase rather 
 
 I installed and configured Active Directory Domain Services and DNS on directory server and created the `[lab domain]` domain.
 
-I also created the organizational structure used by the lab, including the user, group, and workstation OUs. The lab user created for testing is **the support employee**, and the domain user used for workstation testing is **the lab employee**.
+I also created the organizational structure used by the lab, including the user, group, and workstation OUs. The fictional users currently used in the lab are the lab employee, another lab employee, and the support employee.
 
 ### Windows client DNS and domain-controller discovery troubleshooting
 
@@ -83,13 +81,9 @@ nltest /dsgetdc:[lab domain]
 Getting DC name failed: Status = 1355 0x54b ERROR_NO_SUCH_DOMAIN
 ```
 
-I worked through the problem by checking the DNS server, confirming that the `[lab domain]` zone existed, verifying that `directory server` resolved through DNS, checking the DNS configuration on Windows client, and reviewing the directory server security group rules. Some of the initial security group checks showed the required connectivity was not yet working. After correcting the rules, the connectivity checks succeeded and `nltest /dsgetdc:[lab domain]` was able to discover `directory server` and `[lab domain]`.
+I worked through the problem by checking the DNS service, confirming that the `[lab domain]` zone existed, verifying that `directory server` resolved through DNS, checking Netlogon, running DNS diagnostics on directory server, and testing the required connectivity from Windows client. The AWS security group was not initially allowing all of the Active Directory traffic needed between the client and domain controller. After correcting the rules, the connectivity tests succeeded and `nltest /dsgetdc:[lab domain]` was able to discover `directory server` and `[lab domain]`.
 
 This was an important troubleshooting step because it demonstrated that successful DNS name resolution alone does not guarantee that a Windows client can locate a domain controller through the required Active Directory services.
-
-### Evidence
-
-Screenshots documenting the DNS and domain-controller troubleshooting are stored in the repository's `pictures/` directory.
 
 ## Milestone 5 — Join Windows client to the Domain
 
@@ -99,15 +93,11 @@ Once DNS and domain-controller discovery were working, I joined Windows client t
 
 A newly joined computer initially appeared in the default **Computers** container, so I moved `Windows client` into the `[workstation policy or OU]` OU. This was important because the workstation Group Policy created later was linked to that OU.
 
-I also configured Windows client's **Remote Desktop Users** group so that `[lab domain]\\[employee account]` could access the workstation through RDP without being made a local administrator.
+I configured Windows client's Remote Desktop Users group so domain users with the intended RDP rights could access the workstation without automatically becoming local administrators.
 
 ### Verification
 
-the lab employee was able to log in to Windows client using his domain credentials. Verification with `whoami` showed `[lab domain]\\[employee account]`, and the logon server identified directory server.
-
-### Evidence
-
-Screenshots of the domain join, OU placement, and domain-user authentication are stored in `pictures/`.
+the lab employee was able to log in to Windows client using his domain credentials during the domain-join verification. `whoami` showed `[lab domain]\\[employee account]`, and the logon server identified directory server.
 
 ## Milestone 6 — Workstation Group Policy
 
@@ -129,13 +119,11 @@ gpresult /scope computer /r
 
 A standard user such as the lab employee is not expected to see this computer-side GPO under user policy results. The GPO applies to the computer object, not directly to the lab employee's user account.
 
-### What I learned
+### RDP troubleshooting through Group Policy
 
-This helped reinforce the difference between **computer policy** and **user policy** in Active Directory. When troubleshooting Group Policy, the computer's OU, the GPO link, and the policy scope all need to be considered.
+During later testing, the same GPO controlled **Allow log on through Remote Desktop Services** and allowed the `[support role]` and `[IT role]` groups. The Administrator account initially was not in the [IT role] role, so RDP was denied even though the account was an administrator. I added the Administrator account to the existing `[IT role]` group, refreshed Group Policy, and restored administrative RDP access without weakening the workstation policy.
 
-### Evidence
-
-The successful GPO application and OU/GPO configuration screenshots are stored in `pictures/`.
+This reinforced that effective permissions can be controlled by Group Policy and that role-based access can be used without adding users directly to broad policy settings.
 
 ## Milestone 7 — Help Desk Ticket #001: Account Lockout
 
@@ -159,13 +147,33 @@ From the administrator side, I confirmed that the lab employee's Active Director
 
 The successful login verified that the account issue had been resolved.
 
-### What I learned
+## Milestone 8 — Help Desk Ticket #002: New User Onboarding
 
-The scenario demonstrated a basic help desk workflow: identify whether the problem is an authentication issue, verify the user's account state in Active Directory, make the minimum administrative change necessary, and confirm that the user can authenticate again.
+**Status: Complete**
 
-### Evidence
+I created the `[support account]` domain account for the support employee, placed the account in the Help Desk user OU, and added her to the `[support role]` security group.
 
-Relevant account-lockout policy, locked-account, and successful-login screenshots are stored in `pictures/`.
+I verified that the support employee was enabled and that she was not assigned unnecessary administrative groups. During later RDP troubleshooting, she was temporarily given local administrator access on Windows client for testing and that access was removed after the task was complete.
+
+## Milestone 9 — Help Desk Ticket #003: Resource Access
+
+**Status: Complete**
+
+I created a `C:\[shared resource]` folder on directory server, shared it as `[shared resource]`, and configured read-level access for the `[support role]` group.
+
+### Troubleshooting
+
+After establishing a working baseline where the support employee could access `\\directory server\[shared resource]`, I removed the group's NTFS permission to deliberately simulate an Access Denied ticket.
+
+the support employee could still authenticate and remained a member of `[support role]`, so I checked the resource permissions instead of changing her account.
+
+The missing NTFS permission was the cause. I restored `[lab domain]\\[support role]` with Read & Execute, List Folder Contents, and Read permissions.
+
+### Verification
+
+the support employee was able to open `\\directory server\[shared resource]` again and read `[test file]` successfully.
+
+This ticket reinforced the difference between authentication and authorization and the importance of checking both group membership and resource permissions during troubleshooting.
 
 ## Current Environment
 
@@ -192,4 +200,4 @@ I have AWS credits available for this project, but I want to keep the lab as ine
 
 ## Next Up
 
-The next part of the lab will build on the Active Directory foundation with additional help desk scenarios and administrative tasks.
+The next part of the lab will build on the Active Directory foundation with additional help desk scenarios, administrative tasks, PowerShell work, and later security hardening.
