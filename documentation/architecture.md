@@ -70,13 +70,14 @@ AWS us-east-1
 │   │   ├── the lab employee
 │   │   └── another lab employee
 │   ├── HelpDesk
+│   │   └── the support employee
 │   └── IT
-│       └── the support employee
 ├── [group OU]
 │   ├── Employees
 │   ├── [support role]
 │   │   └── the support employee
 │   └── [IT role]
+│       └── Administrator
 ├── [workstation policy or OU]
 │   └── Windows client
 └── Domain Controllers
@@ -87,17 +88,27 @@ AWS us-east-1
 
 I've created a computer-side GPO named `[workstation policy or OU]` and linked it to the `[workstation policy or OU]` OU. I verified that it applies to Windows client using `gpresult` from an elevated administrative command prompt.
 
+The GPO also controls the **Allow log on through Remote Desktop Services** setting for the workstation. During testing, the setting was limited to `[support role]` and `[IT role]`. The Administrator account initially could not RDP to Windows client because it was not a member of `[IT role]`. Adding the account to the existing role group restored the intended administrative RDP access without changing the GPO to a broader configuration.
+
 ## Security Boundary
 
-The Internet Gateway provides network connectivity, but security groups determine which inbound traffic is allowed. For the current lab configuration, the directory server security group uses the Windows client security group as the source for the broad TCP rule used to establish Active Directory connectivity. This keeps the rule limited to the lab client instead of exposing it to the internet.
-
-RDP access is restricted to my public IP.
+The Internet Gateway provides network connectivity, but security groups determine which inbound traffic is allowed. For the current lab configuration, the directory server security group uses the Windows client security group as the source for the broad inbound TCP rule used during the Active Directory connectivity troubleshooting. This keeps the rule limited to the lab client instead of exposing it to the internet. RDP access is restricted to my public IP.
 
 I plan to review and tighten the broader TCP rule during a later hardening phase.
 
 ## Troubleshooting
 
 Before joining Windows client to the domain, I was able to resolve directory server through DNS but `nltest /dsgetdc:[lab domain]` returned `ERROR_NO_SUCH_DOMAIN` (1355). DNS and AD health checks on directory server passed, while the required client-to-DC connectivity was not initially available. After correcting the security-group rules, the required connectivity tests succeeded and Windows client was able to discover directory server.
+
+A later RDP issue was traced to the workstation GPO's Remote Desktop Services logon-right assignment. The effective policy allowed the Help Desk and IT role groups, so adding the Administrator account to `[IT role]` restored administrative RDP access without weakening the policy.
+
+## Help Desk Scenarios
+
+The current lab includes three completed scenarios:
+
+- Account lockout and recovery
+- New user onboarding and role-based group assignment
+- Help Desk share access denied due to a missing NTFS group permission
 
 ## Next
 
