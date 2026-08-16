@@ -28,11 +28,11 @@ the support employee's domain account was successfully provisioned for the Help 
 
 ## Evidence
 
-Relevant screenshots are stored in the repository's `pictures/` directory.
-
-- `the support employee-account-created.png` — account creation / placement
-- `the support employee-helpdesk-group.png` — [support role] membership
+- `support-role-assignment.png` — [support role] membership
 - `support-account-check.png` — account verification
+- `directory-server-role.png` — Active Directory user structure
+
+All are stored in the repository's `pictures/` directory.
 
 ## What I Learned
 
