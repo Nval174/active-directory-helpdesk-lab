@@ -30,13 +30,12 @@ the lab employee successfully logged into Windows client after the account was u
 
 ## Evidence
 
-Relevant screenshots are stored in the repository's `pictures/` directory. The exact screenshot filenames may vary as the evidence is organized.
+- `account-lockout-policy.png` — account lockout settings
+- `account-locked.png` — the lab employee's account in the locked state
+- `domain-login-check.png` — successful domain-user verification on Windows client
+- `account-lockout-message.png` — lockout scenario evidence
 
-Recommended evidence for this ticket includes:
-
-- Account lockout policy configuration
-- the lab employee's account showing the locked state
-- Successful login after the account was unlocked
+All are stored in the repository's `pictures/` directory.
 
 ## What I Learned
 
