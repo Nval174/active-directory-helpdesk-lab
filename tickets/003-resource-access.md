@@ -42,10 +42,17 @@ The main troubleshooting sequence was:
 5. Restore the minimum required access.
 6. Verify that the user could access the resource again.
 
+## Evidence
+
+- `shared-resource-folder.png` — resource created and baseline file
+- `helpdesk-share-ntfs-permissions.png` — NTFS permission configuration
+- `shared-resource-permissions.png` — share permission configuration
+- `resource-access-restored.png` — working access baseline
+- `resource-access-denied.png` — Access Denied condition
+- `resource-access-restored.png` — restored access and successful verification
+
+All are stored in the repository's `pictures/` directory.
+
 ## What I Learned
 
 This ticket helped me understand the difference between authentication and authorization. the support employee could successfully sign in, but that did not automatically give her permission to every resource. I also got hands-on experience with NTFS permissions and the importance of checking the user's group membership before changing access.
-
-## Evidence
-
-Relevant screenshots are stored in the repository's `pictures/` directory. The useful evidence includes the working baseline, the Access Denied result, the user's group verification, and the restored access.
