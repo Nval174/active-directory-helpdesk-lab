@@ -88,7 +88,7 @@ I've worked through several real troubleshooting situations instead of only buil
 |---|---|---|
 | [#001 — Account Lockout](tickets/001-account-lockout.md) | John Smith account locked after failed logons | Resolved |
 | [#002 — New User Onboarding](tickets/002-new-user-onboarding.md) | Create and provision Sophia Martinez | Resolved |
-| [#003 — Help Desk Share Access](tickets/003-helpdesk-share-access.md) | User receives Access Denied to a department resource | Resolved |
+| [#003 — Help Desk Share Access](tickets/003-resource-access.md) | User receives Access Denied to a department resource | Resolved |
 
 ## Keeping Costs Down
 
