@@ -44,9 +44,15 @@ I learned that the computer and the user are separate policy targets. `Lab-Works
 
 I also learned that the computer object has to be in the OU where the GPO is linked. CLIENT01 initially wasn't in that OU, so the policy did not appear in the computer results until I moved it and refreshed Group Policy.
 
+The GPO also became the cause of an RDP logon problem during the lab. The detailed Group Policy report showed that `Lab-Workstations-Baseline` controlled the **Allow log on through Remote Desktop Services** setting and only allowed the `HelpDesk-Technicians` and `IT-Administrators` groups. The Administrator account was not in the IT-Administrators group at first, so RDP access for that account failed. Adding the account to the appropriate role group restored access without weakening the GPO.
+
 ## Help Desk / Troubleshooting
 
 The first account-lockout scenario helped me practice a simple support workflow: confirm the user's account state, identify the likely cause, make the smallest administrative change needed, and verify that the user can log in again.
+
+The resource-access ticket reinforced the difference between authentication and authorization. Sophia could log in successfully and was a member of `HelpDesk-Technicians`, but she still received Access Denied when the group's NTFS permission was removed from `HelpDeskShare`. Restoring the group's read-level NTFS permission fixed the problem.
+
+I also temporarily granted Sophia local administrator access during troubleshooting and then removed it. This reinforced that elevated privileges should be temporary when possible and should not be left in place when the task is complete.
 
 ## Cost Management
 
