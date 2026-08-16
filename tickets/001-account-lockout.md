@@ -30,13 +30,12 @@ John successfully logged into CLIENT01 after the account was unlocked. The domai
 
 ## Evidence
 
-Relevant screenshots are stored in the repository's `pictures/` directory. The exact screenshot filenames may vary as the evidence is organized.
+- `account-lockout-policy.png` — account lockout settings
+- `account-locked.png` — John's account in the locked state
+- `client-domain-user-verification.png` — successful domain-user verification on CLIENT01
+- `ticket001-account-lockout.png` — lockout scenario evidence
 
-Recommended evidence for this ticket includes:
-
-- Account lockout policy configuration
-- John's account showing the locked state
-- Successful login after the account was unlocked
+All are stored in the repository's `pictures/` directory.
 
 ## What I Learned
 
