@@ -60,9 +60,7 @@ The domain controller was configured with the private IPv4 address `10.0.22.196`
 
 ### Security group note
 
-The DC01 security group uses the CLIENT01 security group as the source for the broad inbound TCP rule used during the lab. This keeps the rule scoped to the lab client rather than exposing it to the internet.
-
-I plan to review and tighten the rule set during a later hardening phase rather than changing working connectivity in the middle of the build.
+The DC01 security group uses the CLIENT01 security group as the source for the broad inbound TCP rule used during the lab. This keeps the rule scoped to the lab client rather than exposing it to the internet. I plan to review and tighten the rule set during a later hardening phase.
 
 ## Milestone 4 — Active Directory and DNS
 
@@ -70,7 +68,7 @@ I plan to review and tighten the rule set during a later hardening phase rather 
 
 I installed and configured Active Directory Domain Services and DNS on DC01 and created the `corp.local` domain.
 
-I also created the organizational structure used by the lab, including the user, group, and workstation OUs. The lab user created for testing is **Sophia Martinez**, and the domain user used for workstation testing is **John Smith**.
+I also created the organizational structure used by the lab, including the user, group, and workstation OUs. The fictional users currently used in the lab are John Smith, Maria Garcia, and Sophia Martinez.
 
 ### CLIENT01 DNS and domain-controller discovery troubleshooting
 
@@ -83,13 +81,9 @@ nltest /dsgetdc:corp.local
 Getting DC name failed: Status = 1355 0x54b ERROR_NO_SUCH_DOMAIN
 ```
 
-I worked through the problem by checking the DNS server, confirming that the `corp.local` zone existed, verifying that `DC01` resolved through DNS, checking the DNS configuration on CLIENT01, and reviewing the DC01 security group rules. Some of the initial security group checks showed the required connectivity was not yet working. After correcting the rules, the connectivity checks succeeded and `nltest /dsgetdc:corp.local` was able to discover `DC01` and `corp.local`.
+I worked through the problem by checking the DNS service, confirming that the `corp.local` zone existed, verifying that `DC01` resolved through DNS, checking Netlogon, running DNS diagnostics on DC01, and testing the required connectivity from CLIENT01. The AWS security group was not initially allowing all of the Active Directory traffic needed between the client and domain controller. After correcting the rules, the connectivity tests succeeded and `nltest /dsgetdc:corp.local` was able to discover `DC01` and `corp.local`.
 
 This was an important troubleshooting step because it demonstrated that successful DNS name resolution alone does not guarantee that a Windows client can locate a domain controller through the required Active Directory services.
-
-### Evidence
-
-Screenshots documenting the DNS and domain-controller troubleshooting are stored in the repository's `pictures/` directory.
 
 ## Milestone 5 — Join CLIENT01 to the Domain
 
@@ -99,15 +93,11 @@ Once DNS and domain-controller discovery were working, I joined CLIENT01 to the 
 
 A newly joined computer initially appeared in the default **Computers** container, so I moved `CLIENT01` into the `Lab-Workstations` OU. This was important because the workstation Group Policy created later was linked to that OU.
 
-I also configured CLIENT01's **Remote Desktop Users** group so that `CORP\\jsmith` could access the workstation through RDP without being made a local administrator.
+I configured CLIENT01's Remote Desktop Users group so domain users with the intended RDP rights could access the workstation without automatically becoming local administrators.
 
 ### Verification
 
-John Smith was able to log in to CLIENT01 using his domain credentials. Verification with `whoami` showed `CORP\\jsmith`, and the logon server identified DC01.
-
-### Evidence
-
-Screenshots of the domain join, OU placement, and domain-user authentication are stored in `pictures/`.
+John Smith was able to log in to CLIENT01 using his domain credentials during the domain-join verification. `whoami` showed `CORP\\jsmith`, and the logon server identified DC01.
 
 ## Milestone 6 — Workstation Group Policy
 
@@ -129,13 +119,11 @@ gpresult /scope computer /r
 
 A standard user such as John Smith is not expected to see this computer-side GPO under user policy results. The GPO applies to the computer object, not directly to John's user account.
 
-### What I learned
+### RDP troubleshooting through Group Policy
 
-This helped reinforce the difference between **computer policy** and **user policy** in Active Directory. When troubleshooting Group Policy, the computer's OU, the GPO link, and the policy scope all need to be considered.
+During later testing, the same GPO controlled **Allow log on through Remote Desktop Services** and allowed the `HelpDesk-Technicians` and `IT-Administrators` groups. The Administrator account initially was not in the IT-Administrators role, so RDP was denied even though the account was an administrator. I added the Administrator account to the existing `IT-Administrators` group, refreshed Group Policy, and restored administrative RDP access without weakening the workstation policy.
 
-### Evidence
-
-The successful GPO application and OU/GPO configuration screenshots are stored in `pictures/`.
+This reinforced that effective permissions can be controlled by Group Policy and that role-based access can be used without adding users directly to broad policy settings.
 
 ## Milestone 7 — Help Desk Ticket #001: Account Lockout
 
@@ -159,13 +147,33 @@ From the administrator side, I confirmed that John's Active Directory account wa
 
 The successful login verified that the account issue had been resolved.
 
-### What I learned
+## Milestone 8 — Help Desk Ticket #002: New User Onboarding
 
-The scenario demonstrated a basic help desk workflow: identify whether the problem is an authentication issue, verify the user's account state in Active Directory, make the minimum administrative change necessary, and confirm that the user can authenticate again.
+**Status: Complete**
 
-### Evidence
+I created the `smartinez` domain account for Sophia Martinez, placed the account in the Help Desk user OU, and added her to the `HelpDesk-Technicians` security group.
 
-Relevant account-lockout policy, locked-account, and successful-login screenshots are stored in `pictures/`.
+I verified that Sophia was enabled and that she was not assigned unnecessary administrative groups. During later RDP troubleshooting, she was temporarily given local administrator access on CLIENT01 for testing and that access was removed after the task was complete.
+
+## Milestone 9 — Help Desk Ticket #003: Resource Access
+
+**Status: Complete**
+
+I created a `C:\HelpDeskShare` folder on DC01, shared it as `HelpDeskShare`, and configured read-level access for the `HelpDesk-Technicians` group.
+
+### Troubleshooting
+
+After establishing a working baseline where Sophia could access `\\DC01\HelpDeskShare`, I removed the group's NTFS permission to deliberately simulate an Access Denied ticket.
+
+Sophia could still authenticate and remained a member of `HelpDesk-Technicians`, so I checked the resource permissions instead of changing her account.
+
+The missing NTFS permission was the cause. I restored `CORP\\HelpDesk-Technicians` with Read & Execute, List Folder Contents, and Read permissions.
+
+### Verification
+
+Sophia was able to open `\\DC01\HelpDeskShare` again and read `HelpDesk-Test.txt` successfully.
+
+This ticket reinforced the difference between authentication and authorization and the importance of checking both group membership and resource permissions during troubleshooting.
 
 ## Current Environment
 
@@ -192,4 +200,4 @@ I have AWS credits available for this project, but I want to keep the lab as ine
 
 ## Next Up
 
-The next part of the lab will build on the Active Directory foundation with additional help desk scenarios and administrative tasks.
+The next part of the lab will build on the Active Directory foundation with additional help desk scenarios, administrative tasks, PowerShell work, and later security hardening.
