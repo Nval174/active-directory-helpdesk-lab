@@ -70,13 +70,14 @@ corp.local
 │   │   ├── John Smith
 │   │   └── Maria Garcia
 │   ├── HelpDesk
+│   │   └── Sophia Martinez
 │   └── IT
-│       └── Sophia Martinez
 ├── Lab-Groups
 │   ├── Employees
 │   ├── HelpDesk-Technicians
 │   │   └── Sophia Martinez
 │   └── IT-Administrators
+│       └── Administrator
 ├── Lab-Workstations
 │   └── CLIENT01
 └── Domain Controllers
@@ -87,17 +88,27 @@ corp.local
 
 I've created a computer-side GPO named `Lab-Workstations-Baseline` and linked it to the `Lab-Workstations` OU. I verified that it applies to CLIENT01 using `gpresult` from an elevated administrative command prompt.
 
+The GPO also controls the **Allow log on through Remote Desktop Services** setting for the workstation. During testing, the setting was limited to `HelpDesk-Technicians` and `IT-Administrators`. The Administrator account initially could not RDP to CLIENT01 because it was not a member of `IT-Administrators`. Adding the account to the existing role group restored the intended administrative RDP access without changing the GPO to a broader configuration.
+
 ## Security Boundary
 
-The Internet Gateway provides network connectivity, but security groups determine which inbound traffic is allowed. For the current lab configuration, the DC01 security group uses the CLIENT01 security group as the source for the broad TCP rule used to establish Active Directory connectivity. This keeps the rule limited to the lab client instead of exposing it to the internet.
-
-RDP access is restricted to my public IP.
+The Internet Gateway provides network connectivity, but security groups determine which inbound traffic is allowed. For the current lab configuration, the DC01 security group uses the CLIENT01 security group as the source for the broad inbound TCP rule used during the Active Directory connectivity troubleshooting. This keeps the rule limited to the lab client instead of exposing it to the internet. RDP access is restricted to my public IP.
 
 I plan to review and tighten the broader TCP rule during a later hardening phase.
 
 ## Troubleshooting
 
 Before joining CLIENT01 to the domain, I was able to resolve DC01 through DNS but `nltest /dsgetdc:corp.local` returned `ERROR_NO_SUCH_DOMAIN` (1355). DNS and AD health checks on DC01 passed, while the required client-to-DC connectivity was not initially available. After correcting the security-group rules, the required connectivity tests succeeded and CLIENT01 was able to discover DC01.
+
+A later RDP issue was traced to the workstation GPO's Remote Desktop Services logon-right assignment. The effective policy allowed the Help Desk and IT role groups, so adding the Administrator account to `IT-Administrators` restored administrative RDP access without weakening the policy.
+
+## Help Desk Scenarios
+
+The current lab includes three completed scenarios:
+
+- Account lockout and recovery
+- New user onboarding and role-based group assignment
+- Help Desk share access denied due to a missing NTFS group permission
 
 ## Next
 
