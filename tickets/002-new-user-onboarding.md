@@ -28,11 +28,11 @@ Sophia Martinez's domain account was successfully provisioned for the Help Desk 
 
 ## Evidence
 
-Relevant screenshots are stored in the repository's `pictures/` directory.
-
-- `sophia-account-created.png` — account creation / placement
-- `sophia-helpdesk-group.png` — HelpDesk-Technicians membership
+- `Sophia-added-toHelpDesk.png` — HelpDesk-Technicians membership
 - `sophia-account-verification.png` — account verification
+- `AD-Users.png` — Active Directory user structure
+
+All are stored in the repository's `pictures/` directory.
 
 ## What I Learned
 
