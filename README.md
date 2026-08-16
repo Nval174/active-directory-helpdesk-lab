@@ -20,7 +20,7 @@ This project was inspired by a public Active Directory AWS lab by Zackary R. I'm
 
 **Current status: Core Active Directory help desk lab is working.**
 
-I've built the AWS network, deployed the Windows servers, created the `[lab domain]` Active Directory domain, joined Windows client to the domain, configured a workstation Group Policy, and completed my first help desk scenario.
+I've built the AWS network, deployed the Windows servers, created the `[lab domain]` Active Directory domain, joined Windows client to the domain, configured workstation Group Policy, and completed three help desk scenarios.
 
 ### AWS network
 
@@ -77,18 +77,18 @@ I've worked through several real troubleshooting situations instead of only buil
 - Tested the Active Directory connectivity needed between Windows client and directory server and corrected the AWS security-group rules.
 - Joined Windows client to `[lab domain]` and verified domain authentication with the lab employee.
 - Created `[workstation policy or OU]` and verified that the computer-side GPO applies to Windows client.
+- Troubleshot an RDP logon-rights problem caused by the workstation GPO and corrected the role-based access configuration.
 - Created and resolved an account-lockout scenario for the lab employee.
+- Onboarded the support employee as a Help Desk user and assigned role-based group membership.
+- Created and resolved a Help Desk share access problem by troubleshooting NTFS permissions.
 
-## Help Desk Scenarios
+## Help Desk Tickets
 
-The lab will continue to grow with realistic support situations such as:
-
-- New user onboarding
-- Password resets and account unlocks
-- Group and access changes
-- Group Policy troubleshooting
-- Domain-join problems
-- Basic Windows troubleshooting
+| Ticket | Scenario | Status |
+|---|---|---|
+| [#001 — Account Lockout](tickets/001-account-lockout.md) | the lab employee account locked after failed logons | Resolved |
+| [#002 — New User Onboarding](tickets/002-new-user-onboarding.md) | Create and provision the support employee | Resolved |
+| [#003 — Help Desk Share Access](tickets/003-helpdesk-share-access.md) | User receives Access Denied to a department resource | Resolved |
 
 ## Keeping Costs Down
 
