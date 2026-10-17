@@ -1,58 +1,40 @@
-# Ticket #003 — Help Desk Share Access Denied
+# Ticket 003 — Shared Resource Access Denied
 
-**User:** the support employee  
-**Username:** `[support account]`  
-**Resource:** `\\directory server\[shared resource]`  
+**Identity:** Fictional support employee  
+**Category:** Authorization / Shared Resource  
 **Status:** Resolved
 
 ## Issue
 
-the support employee could log in normally, but she received an **Access Denied** message when trying to open the Help Desk shared folder.
+The employee could authenticate but received Access Denied when opening a shared support resource.
 
 ## Investigation
 
-I first verified that the support employee was still a member of the `[support role]` security group. The account and group membership were correct.
+I verified the role-group membership, then inspected the resource's filesystem permissions. The relevant group permission had been removed during the deliberately simulated failure.
 
-I then checked the NTFS permissions on `C:\[shared resource]` and found that the `[support role]` group was no longer listed. The folder still had permissions for `CREATOR OWNER`, `SYSTEM`, and `Administrators`.
-
-This isolated the problem to the resource's NTFS permissions rather than the user's authentication or group membership.
+This isolated the issue to resource authorization rather than the account's authentication.
 
 ## Resolution
 
-I restored `[lab domain]\[support role]` to the NTFS permissions on `C:\[shared resource]` with read-level access:
-
-- Read & execute
-- List folder contents
-- Read
-
-No unnecessary write or full-control permissions were added.
+I restored the required read-level permission through the role group. No unnecessary write or full-control access was added.
 
 ## Verification
 
-the support employee was able to open `\\directory server\[shared resource]` again and read `[test file]` successfully.
+The employee could open the resource and read its test file again.
 
-## Troubleshooting Approach
+## Troubleshooting Sequence
 
-The main troubleshooting sequence was:
+1. Confirm authentication.
+2. Verify intended role membership.
+3. Inspect share/filesystem permissions.
+4. Identify the missing permission.
+5. Restore minimum required access.
+6. Retest from the user's session.
 
-1. Confirm the user could authenticate.
-2. Verify the user's security-group membership.
-3. Check the resource permissions.
-4. Identify the missing NTFS permission.
-5. Restore the minimum required access.
-6. Verify that the user could access the resource again.
+Live server names, resource paths, identity/group names, and test-file names are omitted.
 
-## Evidence
+## Lesson
 
-- `shared-resource-folder.png` — resource created and baseline file
-- `helpdesk-share-ntfs-permissions.png` — NTFS permission configuration
-- `shared-resource-permissions.png` — share permission configuration
-- `resource-access-restored.png` — working access baseline
-- `resource-access-denied.png` — Access Denied condition
-- `resource-access-restored.png` — restored access and successful verification
+Successful sign-in does not imply permission to every resource. Check both group membership and the resource's own access controls before changing the account.
 
-All are stored in the repository's `pictures/` directory.
-
-## What I Learned
-
-This ticket helped me understand the difference between authentication and authorization. the support employee could successfully sign in, but that did not automatically give her permission to every resource. I also got hands-on experience with NTFS permissions and the importance of checking the user's group membership before changing access.
+Historical evidence files remain in the repository; see [Evidence Notes](../documentation/evidence-notes.md).

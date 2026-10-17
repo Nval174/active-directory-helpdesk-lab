@@ -1,42 +1,25 @@
-# Ticket #001 — the lab employee Account Lockout
+# Ticket 001 — Account Lockout
 
-**User:** the lab employee  
-**Username:** `[employee account]`  
-**Workstation:** Windows client  
+**Identity:** Fictional lab employee  
 **Category:** Account / Authentication  
 **Status:** Resolved
 
 ## Issue
 
-the lab employee was unable to sign in to Windows client because his Active Directory account had become locked.
+The lab employee could not sign in because the directory account had become locked.
 
 ## Investigation
 
-The domain Account Lockout Policy was initially set with a threshold of `0`, which meant accounts would not lock out after failed logon attempts. For this lab scenario, I configured:
+I examined the account-lockout policy, configured a lab threshold/duration, and generated repeated invalid sign-in attempts to trigger the scenario. I then confirmed the locked state in the directory administration tools.
 
-- Account lockout threshold: **a configured threshold**
-- Account lockout duration: **a configured interval**
-- Reset account lockout counter after: **a configured interval**
+Exact account identifiers and policy values are omitted from the public version.
 
-I then simulated repeated incorrect password attempts for the lab employee's account and confirmed the resulting lockout in Active Directory Users and Computers.
+## Resolution and Verification
 
-## Resolution
+I unlocked the account and tested sign-in with the correct credentials. The user authenticated successfully, and a local identity check confirmed the intended session.
 
-I unlocked the lab employee's account in Active Directory and had him sign in again using his correct credentials.
+## Lesson
 
-## Verification
+Confirm the account state, identify the cause, make the smallest required administrative change, and verify successful authentication afterward.
 
-the lab employee successfully logged into Windows client after the account was unlocked. The domain authentication was verified with `whoami`, which returned `[lab domain]\\[employee account]`.
-
-## Evidence
-
-- `account-lockout-policy.png` — account lockout settings
-- `account-locked.png` — the lab employee's account in the locked state
-- `domain-login-check.png` — successful domain-user verification on Windows client
-- `account-lockout-message.png` — lockout scenario evidence
-
-All are stored in the repository's `pictures/` directory.
-
-## What I Learned
-
-This ticket gave me practice with a basic help desk authentication workflow: confirm the user's account state in Active Directory, identify the likely cause, make the smallest administrative change necessary, and verify that the user can authenticate again.
+Historical evidence files remain in the repository; see [Evidence Notes](../documentation/evidence-notes.md) for their review status.

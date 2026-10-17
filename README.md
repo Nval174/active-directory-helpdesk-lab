@@ -1,109 +1,87 @@
-# Active Directory Help Desk Lab
+# Active Directory & Linux Help Desk Lab
 
-I'm building this lab to get more hands-on experience with Windows administration, Active Directory, networking, and the kinds of troubleshooting a help desk technician would actually run into. I'm also using it to build a stronger foundation for cybersecurity.
+I'm building this AWS homelab to practice Windows and Linux administration, identity management, networking, application deployment, and realistic help desk troubleshooting.
 
-This project was inspired by a public Active Directory AWS lab by Zackary R. I'm rebuilding the environment myself, documenting what I learn along the way, and adding my own help desk scenarios and security-focused exercises.
+The original Windows foundation was inspired by a public Active Directory AWS lab by Zackary R. This repository documents my implementation, lessons, and extensions.
 
-## What I'm Trying to Learn
+> Public portfolio edition: live addresses, internal names, account identifiers, cloud resource IDs, connection commands, and detailed access rules are omitted. This is a learning record, not a runnable copy of the private environment.
 
-- How AWS networking works in practice
-- Windows Server administration
-- Active Directory and DNS
-- Creating and managing users, groups, and OUs
-- Group Policy
-- Common help desk troubleshooting
-- PowerShell administration and automation
-- Basic identity and access management concepts
-- How to document technical work clearly
+## Current Status
 
-## Where I'm At
+**The Windows domain, Linux domain membership, internal portal, and scheduled local database backups are working.**
 
-**Current status: Core Active Directory help desk lab is working.**
+Latest build session: **October 16–17, 2026**.
 
-I've built the AWS network, deployed the Windows servers, created the `[lab domain]` Active Directory domain, joined Windows client to the domain, configured workstation Group Policy, and completed three help desk scenarios.
-
-### AWS network
-
-- Region: US East (N. Virginia) (`us-east-1`)
-- VPC: `[lab network resource]` — `[redacted address]`
-- Initial public subnet: `[lab network resource]` — `[redacted address]`
-- Compute subnet: `[lab network resource]` — `[redacted address]`
-- Internet Gateway: `[lab network resource]`
-- Public route table: `[lab network resource]`
-- Default route: `[redacted address]` → Internet Gateway
-
-### Windows / Active Directory
-
-| Host | Role | Status |
+| Component | Role | Verified result |
 |---|---|---|
-| directory server | Windows Server / Domain Controller / DNS | Complete |
-| Windows client | Domain-joined workstation | Complete |
+| Windows domain controller | Directory services and DNS | Domain and DNS checks passed |
+| Windows lab client | Domain member and portal browser | Intended access and portal workflow tested |
+| Linux lab server | Ubuntu LTS, directory integration, internal application | Identity integration and portal working |
 
-Domain: `[lab domain]`
+The new laptop can support smaller local labs, but this project remains on AWS to practice cloud networking and use the existing environment.
 
-The lab currently includes fictional users and groups, a `[workstation policy or OU]` OU, a workstation computer GPO, and a working RDP/domain-authentication workflow.
+## Latest Milestones
 
-## Current Architecture
+- Briefly revalidated the Windows foundation: shared-resource access, role-based remote access, and removal of temporary elevated access.
+- Corrected a documentation mismatch after checking the client's actual organizational-unit placement.
+- Deployed Ubuntu LTS with encrypted storage and hardened instance settings.
+- Configured persistent hostname/DNS settings, checked time synchronization, and joined Linux to Active Directory.
+- Restricted domain-account access by role and verified group-based sudo.
+- Hardened SSH, retained a tested key-based administration path, and enabled a host firewall.
+- Resolved an SSSD responder/socket startup conflict and rechecked identity resolution and machine trust.
+- Deployed an internal help-desk portal using Nginx, Gunicorn, Flask, and SQLite under a non-login service account.
+- Verified ticket persistence after service restarts and checked both application and proxy health paths.
+- Created a daily systemd backup timer and successfully tested backup creation and database integrity.
 
-```text
-AWS us-east-1
-└── [lab network resource]
-    │   [redacted address]
-    │
-    ├── [lab network resource]
-    │
-    ├── [lab network resource]
-    │   └── [redacted address]
-    │
-    └── [lab network resource]
-        └── [redacted address]
-            │
-            ├── directory server
-            │   ├── Active Directory Domain Services
-            │   ├── DNS
-            │   └── [lab domain]
-            │
-            └── Windows client
-                └── Joined to [lab domain]
-```
+See the [Linux build record](documentation/linux-operations.md) for the implementation summary.
 
-## What I've Done So Far
+## Skills Demonstrated
 
-I've worked through several real troubleshooting situations instead of only building the environment:
+- AWS network boundaries, routing, and security-group source relationships
+- Windows Server, Active Directory, DNS, Group Policy, and NTFS/share permissions
+- Linux networking, SSSD/PAM, sudo, SSH, and host firewall management
+- Python/Flask, SQLite, virtual environments, and application deployment
+- Nginx reverse proxying, Gunicorn, systemd services and timers
+- Layered troubleshooting, backup validation, and technical documentation
 
-- Launched Windows Server instances and worked around an EC2 Availability Zone/instance-type issue.
-- Configured Windows client to use directory server for DNS.
-- Troubleshot `nltest /dsgetdc:[lab domain]` returning `ERROR_NO_SUCH_DOMAIN` even though DNS resolution worked.
-- Tested the Active Directory connectivity needed between Windows client and directory server and corrected the AWS security-group rules.
-- Joined Windows client to `[lab domain]` and verified domain authentication with the lab employee.
-- Created `[workstation policy or OU]` and verified that the computer-side GPO applies to Windows client.
-- Troubleshot an RDP logon-rights problem caused by the workstation GPO and corrected the role-based access configuration.
-- Created and resolved an account-lockout scenario for the lab employee.
-- Onboarded the support employee as a Help Desk user and assigned role-based group membership.
-- Created and resolved a Help Desk share access problem by troubleshooting NTFS permissions.
-
-## Help Desk Tickets
+## Help Desk Scenarios
 
 | Ticket | Scenario | Status |
 |---|---|---|
-| [#001 — Account Lockout](tickets/001-account-lockout.md) | the lab employee account locked after failed logons | Resolved |
-| [#002 — New User Onboarding](tickets/002-new-user-onboarding.md) | Create and provision the support employee | Resolved |
-| [#003 — Help Desk Share Access](tickets/003-resource-access.md) | User receives Access Denied to a department resource | Resolved |
+| [001 — Account Lockout](tickets/001-account-lockout.md) | Diagnose and recover a locked lab account | Resolved |
+| [002 — New User Onboarding](tickets/002-new-user-onboarding.md) | Create a role-appropriate lab identity | Resolved |
+| [003 — Resource Access](tickets/003-resource-access.md) | Resolve a shared-resource permission problem | Resolved |
 
-## Keeping Costs Down
+The portal's sample ticket is fictional application test data, not an additional resolved support scenario in this series.
 
-I have AWS credits available for this project, but I don't want to burn through them just for a lab. I'm using smaller instance resources where practical, watching for potentially billable resources, and avoiding leaving compute running when I'm not using it.
+## Boundaries and Remaining Work
+
+This is a restricted learning prototype using fictional data, not a production-ready ticketing service. Operating-system directory membership does not provide web-application login or single sign-on.
+
+Application authentication/authorization, encrypted web transport, backup restoration testing, and off-instance backup protection remain follow-up work. A passing backup integrity check is not a completed restore exercise.
 
 ## Documentation
 
-- [AWS Networking](aws-networking/README.md)
 - [Architecture](documentation/architecture.md)
+- [AWS Networking](aws-networking/README.md)
 - [Build Notes](documentation/build-notes.md)
+- [Linux Operations Build](documentation/linux-operations.md)
+- [Operations and Next Session](documentation/operations-runbook.md)
 - [Lessons Learned](documentation/lessons-learned.md)
-- [Evidence Notes](documentation/evidence-notes.md)
+- [Evidence and Screenshot Placeholders](documentation/evidence-notes.md)
 - [Help Desk Tickets](tickets/README.md)
 - [PowerShell](powershell/README.md)
 
-## Credit to the Original Project
+Six simple screenshot filenames are [reserved for later upload](documentation/evidence-notes.md#linux-milestone-placeholders). No new screenshots are included in this update.
 
-This project was inspired by the publicly available `active-directory-aws-lab` project by Zackary R. The lab I'm building here is my own implementation, configuration, documentation, screenshots, troubleshooting, and future additions.
+## Cost and Session Management
+
+I keep compute resources small and stop instances between sessions. Retained storage and other allocated resources can still incur charges. The next session begins by checking the directory/DNS dependency before bringing dependent workloads back online.
+
+## Publication Scope
+
+This update sanitizes the current Markdown documentation. Earlier Git history and existing images are not erased or certified redacted by this change; they require a separate review. Credentials must never be published.
+
+## Credit
+
+The Windows foundation was inspired by Zackary R.'s `active-directory-aws-lab`. The Linux extension is additional project work. The starter portal was prepared with AI assistance and tested before deployment; the hands-on configuration, verification, and troubleshooting are documented here.

@@ -1,34 +1,31 @@
 # Networking Notes
 
-These are the networking ideas that stood out to me while building the AWS side of the lab.
+This public edition omits live network ranges, addresses, identifiers, and detailed access rules.
 
-## VPC vs. Subnet
+## What I Learned
 
-The VPC is the main network boundary for the lab and uses `[redacted address]`.
+### Network boundaries and routing
 
-The first subnet I created uses `[redacted address]`. I later created `[redacted address]` as a separate compute subnet for the Windows instances.
+A virtual network defines the lab's network boundary. Subnets divide its address space, and route tables determine forwarding. An internet gateway supplies a connectivity path; it is not, by itself, an access-control policy.
 
-## CIDR
+### Layered controls
 
-The `/16` and `/20` prefixes determine the size of the IPv4 networks. Understanding those ranges helped me verify that directory server's `[redacted address]` address belongs to the `[redacted address]` compute subnet.
+Security groups and host firewalls are independent layers. A permitted cloud rule does not guarantee that the operating system accepts the connection, and a shared subnet does not mean all traffic is allowed.
 
-## Internet Gateway
+### Direction matters
 
-The Internet Gateway gives the VPC a path to the internet. It does not, by itself, mean every resource is reachable from the internet. Routing and security controls still matter.
+For an inbound rule, I identify the receiving system first and then the initiating source. This helped prevent confusing the directory server's rules with the Linux web server's rules.
 
-## Route Table
+### DNS versus complete service reachability
 
-The public route table currently has:
+Name resolution, directory discovery, authentication, and application access are different tests. I worked through them separately instead of inferring complete health from one successful lookup.
 
-- `[redacted address]` → `local`
-- `[redacted address]` → `[lab network resource]`
+### Backend isolation
 
-The local route handles traffic inside the VPC. The `[redacted address]` route is the default IPv4 route for destinations outside the VPC.
+The public-facing process in the logical application design is the reverse proxy. The application backend is bound to loopback and does not need its own network ingress allowance.
 
-## Public Subnet and Compute Subnet
+## Linux Extension
 
-I enabled automatic public IPv4 assignment on the subnets used by the lab so I can remotely administer the Windows systems. The EC2 security groups are what limit which inbound traffic is actually allowed.
+I made directory-aware DNS persistent, verified service discovery after reboot, and tested the portal from the intended lab client.
 
-## Security and Cost
-
-I'm treating internet access as something that needs to be controlled rather than assumed to be safe. I keep administrative access restricted to the traffic the lab actually needs, and I keep the AWS resources as small and short-lived as practical so I don't burn through credits unnecessarily.
+The private configuration is kept outside this public summary. See [AWS Networking](../aws-networking/README.md) for the methods and [Architecture](architecture.md) for the role-based conceptual diagram.

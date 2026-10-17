@@ -1,203 +1,81 @@
 # Build Notes
 
-This is my running log for the lab. I'm using it to keep track of what I built, why I chose certain settings, and the troubleshooting that was useful to the project.
+This is the public, sanitized record of what I built and verified. Operational identifiers and detailed access settings are intentionally omitted.
 
-## Initial Repository Setup
+## Original Windows Foundation
 
-I created this repository to document my own Active Directory help desk lab. The goal is to build the environment myself instead of just copying a tutorial and moving on.
+### Network and compute
 
-## Milestone 1 — AWS VPC
+I created an AWS virtual network, subnets, routing, and internet connectivity. An availability-zone/instance-type limitation required adjusting the deployment choice before the Windows systems could be launched.
 
-**Status: Complete**
+### Active Directory and DNS
 
-- Region: US East (N. Virginia) (`us-east-1`)
-- VPC: `[lab network resource]`
-- IPv4 CIDR: `[redacted address]`
+I installed directory services and DNS, created a lab domain, and organized fictional users and role groups.
 
-### Why I chose this
+The client could eventually resolve the directory server, but domain-controller discovery still failed. I checked DNS, directory health, service discovery, and connectivity rather than assuming that name resolution proved all required traffic was working. Correcting cloud firewall connectivity allowed discovery and domain join to succeed.
 
-The VPC is the main network boundary for the lab. A `/16` gives me room to add systems later without making the network unnecessarily complicated.
+### Client policy and remote access
 
-### Evidence
+I joined the client, placed its computer object in the intended organizational unit, and verified computer-side Group Policy. I learned that computer policy is not the same as a standard user's policy results.
 
-![VPC configuration](../aws-networking/network-vpc.png)
+A remote-access problem was traced to the effective logon-right assignment and role membership. Correcting membership restored intended access without broadening the policy unnecessarily.
 
-## Milestone 2 — Public Subnet and Routing
+### Support scenarios
 
-**Status: Complete**
+| Scenario | Work completed |
+|---|---|
+| Account lockout | Configured a lab policy, triggered a lockout, confirmed the state, unlocked the account, and verified sign-in |
+| User onboarding | Created a fictional identity, assigned the required role, and checked that unnecessary privileges were absent |
+| Shared-resource access | Isolated an access-denied problem to missing NTFS permissions and restored read-level access |
 
-- Subnet: `[lab network resource]`
-- IPv4 CIDR: `[redacted address]`
-- VPC: `[lab network resource]`
-- Public IPv4 auto-assignment: enabled
-- Internet Gateway: `[lab network resource]`
-- Route table: `[lab network resource]`
+Temporary elevated access used during troubleshooting was removed.
 
-Routes:
+## Latest Session — October 16–17, 2026
 
-- `[redacted address]` → `local`
-- `[redacted address]` → `[lab network resource]`
+### Foundation revalidation
 
-### What I learned
+I rechecked the Windows baseline before extending it. The useful outcomes were confirmed share access, intended allowed/denied remote-access behavior, removal of temporary elevated access, and correction of an organizational-unit mismatch in the documentation.
 
-The subnet divides the VPC address space into a smaller network. The route table determines where traffic goes, while the Internet Gateway provides the VPC's path to the internet.
+Detailed setup repetition is omitted; the new work focuses on Linux operations.
 
-### Evidence
+### Linux infrastructure and identity
 
-![Subnet configuration](../aws-networking/network-subnet.png)
+1. Deployed Ubuntu LTS on AWS with encrypted storage and hardened instance metadata settings.
+2. Configured persistent naming and directory-aware DNS.
+3. Confirmed internal/external resolution and time synchronization.
+4. Created a dedicated directory location for Linux and completed domain membership.
+5. Validated SSSD identity resolution and machine trust.
+6. Restricted domain-account access by role, enabled home creation, and verified role-based sudo.
+7. Hardened SSH, retained a tested key-based administration path, and enabled the host firewall.
 
-![Route table configuration](../aws-networking/network-route-table.png)
+### Service troubleshooting
 
-## Milestone 3 — Windows Server Instances
+The main SSSD process was healthy, but responder units showed failures. I backed up and validated the configuration, corrected a responder/socket-activation conflict, and rechecked failed units, identity resolution, and machine trust.
 
-**Status: Complete**
+### Application deployment
 
-I launched the Windows Server infrastructure in the AWS environment and configured the domain controller and client networking needed for the Active Directory lab.
+I deployed the tested starter portal through a reverse proxy and non-root backend service. The database was initialized under the application identity. Browser access was restricted to the intended lab workflow and a fictional ticket was created and updated.
 
-During the EC2 setup, `t3.medium` was not available for the selected environment, so I used `t3.small` to keep the lab within the available resources. I also had to launch the instance in a subnet/AZ combination that supported the selected instance type.
+Immediately after a simultaneous proxy/backend restart, a health request returned a gateway error. Repeating both health paths after startup succeeded, consistent with a brief readiness delay. The sample ticket remained in the database.
 
-The domain controller was configured with the private IPv4 address `[redacted address]`.
+### Backups
 
-### Security group note
+I installed a scheduled SQLite backup job, manually triggered it, confirmed a copy existed, and checked integrity. Timer enablement/activity and the next-run listing were also verified.
 
-The directory server security group uses the Windows client security group as the source for the broad inbound TCP rule used during the lab. This keeps the rule scoped to the lab client rather than exposing it to the internet. I plan to review and tighten the rule set during a later hardening phase.
+This proves backup creation, not restoration or off-instance recovery.
 
-## Milestone 4 — Active Directory and DNS
+## Current Checkpoint
 
-**Status: Complete**
+The domain foundation, Linux identity integration, host hardening, portal, and manual backup are working. New screenshot uploads are pending.
 
-I installed and configured Active Directory Domain Services and DNS on directory server and created the `[lab domain]` domain.
-
-I also created the organizational structure used by the lab, including the user, group, and workstation OUs. The fictional users currently used in the lab are the lab employee, another lab employee, and the support employee.
-
-### Windows client DNS and domain-controller discovery troubleshooting
-
-Before joining Windows client to the domain, DNS and domain-controller discovery did not work correctly.
-
-The first checks showed that Windows client was using the expected DNS server address, and `nslookup` was eventually able to resolve the domain controller. However, the following command initially failed:
-
-```text
-nltest /dsgetdc:[lab domain]
-Getting DC name failed: Status = 1355 0x54b ERROR_NO_SUCH_DOMAIN
-```
-
-I worked through the problem by checking the DNS service, confirming that the `[lab domain]` zone existed, verifying that `directory server` resolved through DNS, checking Netlogon, running DNS diagnostics on directory server, and testing the required connectivity from Windows client. The AWS security group was not initially allowing all of the Active Directory traffic needed between the client and domain controller. After correcting the rules, the connectivity tests succeeded and `nltest /dsgetdc:[lab domain]` was able to discover `directory server` and `[lab domain]`.
-
-This was an important troubleshooting step because it demonstrated that successful DNS name resolution alone does not guarantee that a Windows client can locate a domain controller through the required Active Directory services.
-
-## Milestone 5 — Join Windows client to the Domain
-
-**Status: Complete**
-
-Once DNS and domain-controller discovery were working, I joined Windows client to the `[lab domain]` domain.
-
-A newly joined computer initially appeared in the default **Computers** container, so I moved `Windows client` into the `[workstation policy or OU]` OU. This was important because the workstation Group Policy created later was linked to that OU.
-
-I configured Windows client's Remote Desktop Users group so domain users with the intended RDP rights could access the workstation without automatically becoming local administrators.
-
-### Verification
-
-the lab employee was able to log in to Windows client using his domain credentials during the domain-join verification. `whoami` showed `[lab domain]\\[employee account]`, and the logon server identified directory server.
-
-## Milestone 6 — Workstation Group Policy
-
-**Status: Complete**
-
-I created a computer-side Group Policy Object named `[workstation policy or OU]` and linked it to the `[workstation policy or OU]` OU.
-
-The policy enables **Always wait for the network at computer startup and logon** under:
-
-`Computer Configuration → Policies → Administrative Templates → System → Logon`
-
-The first `gpresult` checks did not show the GPO because Windows client was not yet in the OU to which the GPO was linked. After moving Windows client into `[workstation policy or OU]`, I verified the GPO from an elevated Administrator command prompt using:
-
-```cmd
-gpresult /scope computer /r
-```
-
-`[workstation policy or OU]` appeared under the applied computer GPOs.
-
-A standard user such as the lab employee is not expected to see this computer-side GPO under user policy results. The GPO applies to the computer object, not directly to the lab employee's user account.
-
-### RDP troubleshooting through Group Policy
-
-During later testing, the same GPO controlled **Allow log on through Remote Desktop Services** and allowed the `[support role]` and `[IT role]` groups. The Administrator account initially was not in the [IT role] role, so RDP was denied even though the account was an administrator. I added the Administrator account to the existing `[IT role]` group, refreshed Group Policy, and restored administrative RDP access without weakening the workstation policy.
-
-This reinforced that effective permissions can be controlled by Group Policy and that role-based access can be used without adding users directly to broad policy settings.
-
-## Milestone 7 — Help Desk Ticket #001: Account Lockout
-
-**Status: Complete**
-
-I created a realistic account-lockout scenario using the lab employee's domain account.
-
-### Initial configuration
-
-The domain's Account Lockout Policy initially had the lockout threshold set to `0`, meaning accounts would not be locked after failed authentication attempts. For the lab scenario, I configured:
-
-- Account lockout threshold: **a configured threshold**
-- Account lockout duration: **a configured interval**
-- Reset account lockout counter after: **a configured interval**
-
-I then simulated the lab employee entering an incorrect password enough times to trigger the lockout.
-
-### Investigation and resolution
-
-From the administrator side, I confirmed that the lab employee's Active Directory account was locked. I unlocked the account and had the lab employee log in again with his correct credentials.
-
-The successful login verified that the account issue had been resolved.
-
-## Milestone 8 — Help Desk Ticket #002: New User Onboarding
-
-**Status: Complete**
-
-I created the `[support account]` domain account for the support employee, placed the account in the Help Desk user OU, and added her to the `[support role]` security group.
-
-I verified that the support employee was enabled and that she was not assigned unnecessary administrative groups. During later RDP troubleshooting, she was temporarily given local administrator access on Windows client for testing and that access was removed after the task was complete.
-
-## Milestone 9 — Help Desk Ticket #003: Resource Access
-
-**Status: Complete**
-
-I created a `C:\[shared resource]` folder on directory server, shared it as `[shared resource]`, and configured read-level access for the `[support role]` group.
-
-### Troubleshooting
-
-After establishing a working baseline where the support employee could access `\\directory server\[shared resource]`, I removed the group's NTFS permission to deliberately simulate an Access Denied ticket.
-
-the support employee could still authenticate and remained a member of `[support role]`, so I checked the resource permissions instead of changing her account.
-
-The missing NTFS permission was the cause. I restored `[lab domain]\\[support role]` with Read & Execute, List Folder Contents, and Read permissions.
-
-### Verification
-
-the support employee was able to open `\\directory server\[shared resource]` again and read `[test file]` successfully.
-
-This ticket reinforced the difference between authentication and authorization and the importance of checking both group membership and resource permissions during troubleshooting.
-
-## Current Environment
-
-```text
-AWS us-east-1
-└── [lab network resource] ([redacted address])
-    └── Windows Server / Active Directory
-        ├── directory server
-        │   ├── Active Directory Domain Services
-        │   └── DNS
-        │
-        └── [lab domain]
-            ├── [user OU]
-            ├── [group OU]
-            ├── [workstation policy or OU]
-            │   └── Windows client
-            └── Domain Controllers
-                └── directory server
-```
-
-## Cost Considerations
-
-I have AWS credits available for this project, but I want to keep the lab as inexpensive as possible. I am using smaller instance resources where practical and will stop or terminate resources when they are no longer needed.
+See [Linux Operations](linux-operations.md) for details and [Operations Runbook](operations-runbook.md) for the next-session checklist.
 
 ## Next Up
 
-The next part of the lab will build on the Active Directory foundation with additional help desk scenarios, administrative tasks, PowerShell work, and later security hardening.
+- Test restoration into a separate database.
+- Validate a full instance stop/start cycle.
+- Add retention and off-instance backup protection.
+- Add monitoring and practical log review.
+- Improve application authentication/authorization and transport protection.
+- Review older connectivity allowances.
+- Upload only sanitized milestone screenshots.

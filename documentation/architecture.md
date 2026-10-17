@@ -1,115 +1,65 @@
 # Lab Architecture
 
-## Purpose
+Public portfolio summary, updated **October 16–17, 2026**. Component labels below are generic roles, not connection targets.
 
-This document describes the architecture I've built and verified for the Active Directory help desk lab.
+## Components
 
-## Current Environment
+| Component | Purpose |
+|---|---|
+| AWS virtual network | Network boundary and routing for the lab |
+| Windows directory server | Active Directory and DNS |
+| Windows client | Domain-authentication, support, and browser tests |
+| Ubuntu LTS server | Directory-integrated Linux and internal application hosting |
+| Dedicated application identity | Runs the web backend without an interactive shell |
+| Local backup job | Creates and validates SQLite copies |
 
-The lab is running in AWS US East (N. Virginia), `us-east-1`.
+Live network ranges, host/domain names, resource identifiers, account/group names, and exact access rules are intentionally excluded.
 
-### Network
+## Logical Service Flow
 
-| Component | Configuration | Status |
-|---|---|---|
-| VPC | `[lab network resource]` / `[redacted address]` | Complete |
-| Initial public subnet | `[lab network resource]` / `[redacted address]` | Complete |
-| Compute subnet | `[lab network resource]` / `[redacted address]` | Complete |
-| Internet Gateway | `[lab network resource]` | Complete |
-| Public route table | `[lab network resource]` | Complete |
-
-### Current Routing
-
-```text
-Destination       Target
-[redacted address]       local
-[redacted address]         [lab network resource]
+```mermaid
+flowchart TD
+    C["Windows lab browser"] -->|"Restricted web access"| N["Nginx reverse proxy"]
+    N -->|"Loopback only"| A["Gunicorn and Flask"]
+    A -->|"Application data"| D["SQLite database"]
+    L["Linux identity services"] -->|"Directory integration"| W["Windows directory and DNS"]
+    B["Scheduled backup job"] -->|"Consistent database copy"| D
+    B -->|"Integrity-checked copy"| V["Local backup storage"]
 ```
 
-The compute subnet uses the same route table.
+This is a conceptual diagram, not the deployed network map. The Linux identity integration and web-application access model are separate concerns.
 
-## Current Systems
+## Security Design
 
-| Host | Role | Private IP | Status |
-|---|---|---|---|
-| directory server | Windows Server / Domain Controller / DNS | `[redacted address]` | Complete |
-| Windows client | Domain-joined workstation | Assigned by AWS | Complete |
+- Cloud security groups and a Linux host firewall provide distinct network controls.
+- Administrative access is restricted rather than openly exposed.
+- The web backend binds to loopback and is reached through the proxy.
+- Application code is owned by an administrative identity and is not writable by the application account.
+- The application account has a dedicated writable data location.
+- A protected environment file supplies runtime configuration; its contents are not published.
+- A systemd unit runs the backend without root privileges and applies filesystem/process restrictions.
+- Linux directory-account access and elevated commands are assigned through roles.
 
-Active Directory domain: `[lab domain]`
+These controls reduce risk but do not establish production readiness or replace application-level authorization.
 
-## Current Architecture
+## Verified State
 
-```text
-AWS us-east-1
-└── [lab network resource]
-    │   [redacted address]
-    │
-    ├── [lab network resource]
-    │
-    ├── [lab network resource]
-    │   └── [redacted address]
-    │
-    └── [lab network resource]
-        └── [redacted address]
-            │
-            ├── directory server
-            │   ├── Active Directory Domain Services
-            │   ├── DNS
-            │   └── [lab domain]
-            │
-            └── Windows client
-                └── Domain member
-```
+| Area | Evidence from the session |
+|---|---|
+| Directory membership | Discovery, join validation, machine trust, and identity resolution succeeded |
+| Role policy | Intended allowed/denied account checks and elevated-command test passed |
+| Host hardening | Key-based administration still worked after SSH/firewall changes |
+| Application | Browser workflow and direct/proxied health checks succeeded |
+| Persistence | A sample ticket remained after service restart |
+| Backups | A manually triggered copy passed SQLite integrity validation |
 
-## Active Directory Structure
+## Pending Validation and Improvements
 
-```text
-[lab domain]
-├── [user OU]
-│   ├── Employees
-│   │   ├── the lab employee
-│   │   └── another lab employee
-│   ├── HelpDesk
-│   │   └── the support employee
-│   └── IT
-├── [group OU]
-│   ├── Employees
-│   ├── [support role]
-│   │   └── the support employee
-│   └── [IT role]
-│       └── Administrator
-├── [workstation policy or OU]
-│   └── Windows client
-└── Domain Controllers
-    └── directory server
-```
+- Isolated database restoration and recovered-record comparison
+- Complete instance stop/start recovery exercise
+- Negative web-access testing from disallowed sources
+- Application authentication/authorization and encrypted transport
+- Backup retention, off-instance copies, and monitoring
+- Review of an older broad connectivity rule
 
-## Group Policy
-
-I've created a computer-side GPO named `[workstation policy or OU]` and linked it to the `[workstation policy or OU]` OU. I verified that it applies to Windows client using `gpresult` from an elevated administrative command prompt.
-
-The GPO also controls the **Allow log on through Remote Desktop Services** setting for the workstation. During testing, the setting was limited to `[support role]` and `[IT role]`. The Administrator account initially could not RDP to Windows client because it was not a member of `[IT role]`. Adding the account to the existing role group restored the intended administrative RDP access without changing the GPO to a broader configuration.
-
-## Security Boundary
-
-The Internet Gateway provides network connectivity, but security groups determine which inbound traffic is allowed. For the current lab configuration, the directory server security group uses the Windows client security group as the source for the broad inbound TCP rule used during the Active Directory connectivity troubleshooting. This keeps the rule limited to the lab client instead of exposing it to the internet. RDP access is restricted to my public IP.
-
-I plan to review and tighten the broader TCP rule during a later hardening phase.
-
-## Troubleshooting
-
-Before joining Windows client to the domain, I was able to resolve directory server through DNS but `nltest /dsgetdc:[lab domain]` returned `ERROR_NO_SUCH_DOMAIN` (1355). DNS and AD health checks on directory server passed, while the required client-to-DC connectivity was not initially available. After correcting the security-group rules, the required connectivity tests succeeded and Windows client was able to discover directory server.
-
-A later RDP issue was traced to the workstation GPO's Remote Desktop Services logon-right assignment. The effective policy allowed the Help Desk and IT role groups, so adding the Administrator account to `[IT role]` restored administrative RDP access without weakening the policy.
-
-## Help Desk Scenarios
-
-The current lab includes three completed scenarios:
-
-- Account lockout and recovery
-- New user onboarding and role-based group assignment
-- Help Desk share access denied due to a missing NTFS group permission
-
-## Next
-
-I'll continue expanding the lab with more help desk scenarios, administrative tasks, PowerShell work, and later security hardening.
+See [Linux Operations](linux-operations.md) and the [Operations Runbook](operations-runbook.md).

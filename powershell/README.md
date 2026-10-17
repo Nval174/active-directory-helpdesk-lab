@@ -1,5 +1,7 @@
 # PowerShell
 
-PowerShell scripts and command examples created during the lab will be documented here.
+PowerShell scripts and examples will be added after testing and explanation in the lab.
 
-Scripts will only be added after they have been tested in the lab and explained in the project documentation.
+One deployment lesson from the Linux extension was to distinguish the Windows shell from an SSH Bash session. Commands must be run in the environment whose syntax and local files they use.
+
+Any future published script will use placeholders instead of live connection details, account identifiers, key locations, or credentials.

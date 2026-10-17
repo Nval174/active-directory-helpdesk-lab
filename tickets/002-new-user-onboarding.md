@@ -1,39 +1,28 @@
-# Ticket #002 — New User Onboarding
+# Ticket 002 — New User Onboarding
 
-**User:** the support employee  
-**Username:** `[support account]`  
-**Department:** Help Desk  
+**Identity:** Fictional support employee  
+**Category:** Identity / Provisioning  
 **Status:** Resolved
 
 ## Request
 
-Create a new domain account for a Help Desk employee and provide the access required for the role.
+Create a directory identity for a support employee and provide access appropriate to the role.
 
-## Actions Taken
+## Actions
 
-- Created the `[support account]` account in the Help Desk user OU.
-- Added the support employee to the `[support role]` security group.
-- Verified that the account was enabled and available for domain authentication.
-- Confirmed that the support employee was not assigned unnecessary administrative groups.
+- Created the fictional account in the intended organizational location.
+- Assigned the support role through group membership.
+- Verified the account was enabled and available for domain authentication.
+- Confirmed unnecessary administrative memberships were absent.
+
+Live identity, group, and organizational names are omitted.
 
 ## Verification
 
-The account and group membership were verified in Active Directory Users and Computers and with domain account information from the command line.
+Directory administration tools and account queries confirmed the intended state. The account was provisioned with role-appropriate access rather than broad administrative privileges.
 
-The account was provisioned with role-appropriate access rather than administrative privileges.
+## Lesson
 
-## Result
+Provisioning is not complete until the identity, placement, membership, and effective access have been checked.
 
-the support employee's domain account was successfully provisioned for the Help Desk role with the intended group membership and without unnecessary administrative access.
-
-## Evidence
-
-- `support-role-assignment.png` — [support role] membership
-- `support-account-check.png` — account verification
-- `directory-server-role.png` — Active Directory user structure
-
-All are stored in the repository's `pictures/` directory.
-
-## What I Learned
-
-This ticket reinforced a basic help desk and identity-management workflow: create the account, place it in the correct organizational unit, assign role-based group membership, verify the account, and check that the user has only the access needed for the role.
+Historical evidence files remain in the repository; see [Evidence Notes](../documentation/evidence-notes.md).

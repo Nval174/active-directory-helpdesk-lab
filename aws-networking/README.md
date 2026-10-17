@@ -1,38 +1,37 @@
 # AWS Networking
 
-This section documents the AWS network I built for the lab before deploying and configuring the Windows systems.
+This public summary describes the networking skills demonstrated by the lab. Live addressing, cloud resource identifiers, internal names, administrative source addresses, and exact rule sets are intentionally omitted.
 
-## What I Built
+## Foundation
 
-- VPC: `[lab network resource]` — `[redacted address]`
-- Initial public subnet: `[lab network resource]` — `[redacted address]`
-- Compute subnet: `[lab network resource]` — `[redacted address]`
-- Internet Gateway: `[lab network resource]`
-- Route table: `[lab network resource]`
-- Default route: `[redacted address]` → Internet Gateway
+I created a virtual network with separate subnet allocations, an internet gateway, and routing. An availability-zone constraint required adjusting the compute deployment location.
 
-## Evidence
+The Windows systems and added Linux server use the existing compute network. The Linux addition did not require a new VPC or local virtual machine.
 
-These screenshots show the network configuration I completed in AWS. I reviewed the images and covered sensitive information before adding them to the repository.
+## Security-Group Direction
 
-### VPC
+A useful lesson was identifying the destination resource and the initiating source separately:
 
-I created the VPC as the main network boundary for the lab and used the `[redacted address]` address space.
+- Directory traffic from Linux is permitted at the directory server's boundary.
+- Browser traffic from the lab client is permitted at the web server's boundary.
+- Administrative traffic is narrowly scoped rather than opened to all sources.
+- A Linux host firewall enforces another layer of restrictions.
+- The application backend stays on loopback behind its reverse proxy.
 
-![VPC configuration](network-vpc.png)
+These are logical relationships, not a disclosure of the deployed access-control matrix.
 
-### Initial Public Subnet
+## DNS and Service Discovery
 
-I created the initial public subnet using `[redacted address]`.
+Linux was configured to use directory-aware DNS persistently. Tests covered directory-service discovery, internal resolution, external resolution, and behavior after reboot.
 
-![Subnet configuration](network-subnet.png)
+A successful host lookup alone was not treated as proof that domain discovery or authentication would work.
 
-### Route Table
+## Limitations and Follow-Up
 
-I associated the public subnet with `[lab network resource]` and configured the local route plus the default route through the Internet Gateway.
+- Public routing does not mean unrestricted ingress; firewall controls still matter.
+- Shared-network placement does not bypass host or cloud security controls.
+- Positive application access was tested; negative tests from disallowed sources remain pending.
+- An older broad lab connectivity allowance remains for later review.
+- Any future changes to features, membership, or addressing require a fresh connectivity review.
 
-![Route table configuration](network-route-table.png)
-
-## Additional Compute Subnet
-
-I later created `[lab network resource]` using `[redacted address]` after the first Availability Zone did not support the EC2 instance configuration I was trying to use. The Windows instances use this subnet.
+See [Architecture](../documentation/architecture.md), [Linux Operations](../documentation/linux-operations.md), and [Evidence Notes](../documentation/evidence-notes.md) for the documentation and image-review scope.

@@ -1,63 +1,69 @@
 # Lessons Learned
 
-This is where I'm keeping the technical lessons that have stood out to me while building and troubleshooting the lab.
+This is the public learning record for the Windows foundation and Linux extension. Examples are generalized to avoid exposing live infrastructure or identities.
 
-## AWS Networking
+## AWS and Windows Foundation
 
-### VPC vs. Subnet
+### Test the layers separately
 
-I learned that the VPC is the main network boundary for the lab, while subnets divide that address space into smaller networks. My VPC uses `[redacted address]` and my initial public subnet uses `[redacted address]`.
+The Windows client could resolve a directory-server name while domain discovery still failed. Checking DNS, directory services, and connectivity separately isolated the problem to cloud firewall access.
 
-I later created a second subnet, `[redacted address]`, for the Windows compute instances after the first Availability Zone did not support the instance configuration I was trying to use.
+### Role membership and policy both matter
 
-### CIDR Notation
+Remote access depends on effective logon rights as well as account/group membership. I corrected a role-membership issue instead of widening access without understanding the cause.
 
-The `/16` and `/20` prefixes determine the size of the IPv4 networks. Understanding the ranges helped me recognize that directory server's address, `[redacted address]`, was valid inside the `[redacted address]` compute subnet.
+### Computer policy is not user policy
 
-### Internet Gateway and Route Tables
+A computer-side policy must target the computer's actual directory location. A standard user's policy results do not necessarily show that computer policy. Later revalidation also showed why live directory state should take precedence over old documentation.
 
-I learned that an Internet Gateway provides a path between the VPC and the internet, while the route table determines where traffic is sent. The default route `[redacted address]` points to the Internet Gateway, while the local route handles traffic inside the VPC.
+### Authentication is not resource authorization
 
-### Security Groups
+A fictional support user could sign in but still could not open a shared resource. The cause was a missing NTFS group permission, not the user's password. Restoring minimum read-level access resolved the issue without unnecessary elevation.
 
-I learned that connectivity problems can come from more than one layer. In this lab, DNS could work while other Active Directory traffic was blocked. Testing the required ports helped me identify that the directory server security group needed additional access from the Windows client security group.
+### Temporary privilege should be removed
 
-I deliberately kept the source limited to the Windows client security group instead of opening the Active Directory traffic to the public internet. I also learned that a broad rule can be useful during a lab build, but it should be reviewed and tightened during hardening.
+I used elevated access for troubleshooting and removed it afterward. Successful troubleshooting is not a reason to leave extra privileges in place.
 
-## Active Directory and DNS
+## Linux Extension — October 16–17, 2026
 
-### DNS Matters to Active Directory
+### Verify current state
 
-One of the biggest lessons so far has been how much Active Directory depends on DNS. Windows client could resolve the domain controller, but that alone was not enough for domain-controller discovery.
+A direct directory query revealed an organizational-unit mismatch in the old notes. I corrected the current-state description instead of treating historical documentation as authoritative.
 
-### Troubleshooting `nltest`
+### Keep an administration path while hardening
 
-Before joining Windows client to the domain, `nslookup` could resolve directory server but `nltest /dsgetdc:[lab domain]` returned `ERROR_NO_SUCH_DOMAIN` (1355).
+I checked SSH syntax and opened another key-based session after applying restrictions. That provided evidence that intended administration still worked before relying on the new configuration.
 
-I checked the DNS service, confirmed the `[lab domain]` zone existed, verified the Active Directory DNS records, checked Netlogon, ran the DNS diagnostic on directory server, and tested the required connectivity from Windows client. The issue was ultimately tied to missing client-to-DC connectivity in the AWS security group. After correcting the rules, the connectivity tests succeeded and `nltest` was able to find directory server.
+### Examine failed child units, not only the main service
 
-That was a useful reminder that troubleshooting should move through the layers instead of assuming that a successful DNS lookup means the entire Active Directory connection is healthy.
+The main identity process was active while responders showed failures. The host had overlapping responder configuration and socket activation. Backing up and validating the configuration, then checking identities and machine trust again, was more meaningful than clearing the failed-state indicators alone.
 
-## Group Policy
+### OS identity is not application login
 
-I learned that the computer and the user are separate policy targets. `[workstation policy or OU]` is a computer-side GPO linked to the `[workstation policy or OU]` OU, so it applies to Windows client rather than directly to the lab employee.
+Joining Linux to a directory and delegating sudo by role did not add sign-in or ticket authorization to the web application. These are separate security boundaries.
 
-I also learned that the computer object has to be in the OU where the GPO is linked. Windows client initially wasn't in that OU, so the policy did not appear in the computer results until I moved it and refreshed Group Policy.
+### Running is not ready
 
-The GPO also became the cause of an RDP logon problem during the lab. The detailed Group Policy report showed that `[workstation policy or OU]` controlled the **Allow log on through Remote Desktop Services** setting and only allowed the `[support role]` and `[IT role]` groups. The Administrator account was not in the [IT role] group at first, so RDP access for that account failed. Adding the account to the appropriate role group restored access without weakening the GPO.
+Immediately after restarting the proxy and backend, a request briefly failed even though the processes were active. Follow-up health checks through both paths succeeded. Future automation should use bounded readiness checks and investigate persistent errors.
 
-## Help Desk / Troubleshooting
+### Respect the shell boundary
 
-The first account-lockout scenario helped me practice a simple support workflow: confirm the user's account state, identify the likely cause, make the smallest administrative change needed, and verify that the user can log in again.
+A Windows upload command failed inside the Linux SSH session. Labeling commands by the shell where they run prevents avoidable deployment errors.
 
-The resource-access ticket reinforced the difference between authentication and authorization. the support employee could log in successfully and was a member of `[support role]`, but she still received Access Denied when the group's NTFS permission was removed from `[shared resource]`. Restoring the group's read-level NTFS permission fixed the problem.
+### Separate code ownership from data writes
 
-I also temporarily granted the support employee local administrator access during troubleshooting and then removed it. This reinforced that elevated privileges should be temporary when possible and should not be left in place when the task is complete.
+The application runs without root privileges and can write its data location but cannot replace administratively owned application code. Service restrictions add protection; they do not replace application authentication or transport security.
 
-## Cost Management
+### Backup integrity is only one checkpoint
 
-I'm keeping the AWS lab small because I want the project to stay useful without spending credits unnecessarily. I'm using smaller instances where practical and plan to stop resources when I'm done working with them.
+A consistent SQLite copy passed structural checks. I still need to restore it separately and verify recovered records. Local copies do not protect against losing the underlying instance storage, and a database-only backup does not capture a complete rebuild.
 
-## Documentation
+### Account for downtime and timezone changes
 
-I'm keeping screenshots at meaningful verification points rather than capturing every click. I also review screenshots before adding them to the repository so I don't accidentally publish credentials or other sensitive information.
+Persistent timers can catch up after downtime but cannot execute while the host is stopped. A UTC calendar schedule also shifts relative to local wall-clock time when daylight-saving changes.
+
+## Documentation and Publication
+
+I keep screenshots at meaningful milestones instead of recording every click. Public summaries should explain the technical reasoning without exposing credentials or live connection details.
+
+The latest text has been sanitized. Existing images and earlier Git history are separate review items; this edit does not erase them.
