@@ -34,4 +34,14 @@ A successful host lookup alone was not treated as proof that domain discovery or
 - An older broad lab connectivity allowance remains for later review.
 - Any future changes to features, membership, or addressing require a fresh connectivity review.
 
-See [Architecture](../documentation/architecture.md), [Linux Operations](../documentation/linux-operations.md), and [Evidence Notes](../documentation/evidence-notes.md) for the documentation and image-review scope.
+## Historical Network Evidence
+
+I kept these captures from the original build and covered the identifying details. They show the setup workflow, not a current network inventory.
+
+![Original virtual-network setup](../pictures/network-vpc.png)
+
+![Original subnet setup](../pictures/network-subnet.png)
+
+![Original route-table setup](../pictures/network-route-table.png)
+
+See [Architecture](../documentation/architecture.md), [Linux Operations](../documentation/linux-operations.md), and [Evidence Notes](../documentation/evidence-notes.md) for the current build record and review scope.

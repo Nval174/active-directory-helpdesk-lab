@@ -1,0 +1,28 @@
+# Local environments and generated files
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.log
+
+# Runtime secrets, credentials, and application data
+.env
+.env.*
+*.env
+.ssh/
+*.pem
+*.key
+*.pfx
+*.p12
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+
+# Source evidence and repository backups stay outside the public repository
+*.bundle
+*.zip
+private/
+originals/
+unredacted/

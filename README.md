@@ -4,7 +4,7 @@ I'm building this AWS homelab to practice Windows and Linux administration, iden
 
 The original Windows foundation was inspired by a public Active Directory AWS lab by Zackary R. This repository documents my implementation, lessons, and extensions.
 
-> Public portfolio edition: live addresses, internal names, account identifiers, cloud resource IDs, connection commands, and detailed access rules are omitted. This is a learning record, not a runnable copy of the private environment.
+I use generic labels in this writeup and cover identifying details in screenshots. I keep live connection details and credentials outside the repository.
 
 ## Current Status
 
@@ -34,6 +34,10 @@ The new laptop can support smaller local labs, but this project remains on AWS t
 - Created a daily systemd backup timer and successfully tested backup creation and database integrity.
 
 See the [Linux build record](documentation/linux-operations.md) for the implementation summary.
+
+![The internal help desk portal with a fictional sample ticket](pictures/helpdesk-portal.png)
+
+I created and updated this fictional ticket to check the browser workflow. The blackouts hide lab identifiers; the ticket content is sample data.
 
 ## Skills Demonstrated
 
@@ -68,11 +72,12 @@ Application authentication/authorization, encrypted web transport, backup restor
 - [Linux Operations Build](documentation/linux-operations.md)
 - [Operations and Next Session](documentation/operations-runbook.md)
 - [Lessons Learned](documentation/lessons-learned.md)
-- [Evidence and Screenshot Placeholders](documentation/evidence-notes.md)
+- [Evidence Notes](documentation/evidence-notes.md)
+- [Screenshot Index](pictures/README.md)
 - [Help Desk Tickets](tickets/README.md)
 - [PowerShell](powershell/README.md)
 
-Six simple screenshot filenames are [reserved for later upload](documentation/evidence-notes.md#linux-milestone-placeholders). No new screenshots are included in this update.
+I have added the available milestone screenshots. The SSSD repair capture is still missing; I kept the original failure screenshot and did not relabel it as a successful repair.
 
 ## Cost and Session Management
 
@@ -80,7 +85,9 @@ I keep compute resources small and stop instances between sessions. Retained sto
 
 ## Publication Scope
 
-This update sanitizes the current Markdown documentation. Earlier Git history and existing images are not erased or certified redacted by this change; they require a separate review. Credentials must never be published.
+I reviewed the current files and all 77 earlier commits, replaced the screenshot versions with redacted copies, and removed identifiers from historical text and commit metadata. This cleanup preserves the commit sequence and original dates. My author address now uses GitHub's no-reply address.
+
+The [evidence notes](documentation/evidence-notes.md) explain the review scope and what still needs to be captured. Historical screenshots record earlier steps; I do not treat them as a current configuration export.
 
 ## Credit
 

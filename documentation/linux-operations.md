@@ -41,8 +41,11 @@ A sudoers rule delegated elevated commands through the same role group. Its synt
 
 The local key-based administration path remained available. Direct SSH login using a directory identity was not part of the verified workflow, and OS membership did not add web-application single sign-on.
 
-> Screenshot upload pending: `pictures/linux-ad-login.png`  
-> Screenshot upload pending: `pictures/linux-sudo-access.png`
+![Directory-account session with identifying output covered](../pictures/linux-ad-login.png)
+
+This captures the session and identity-check commands. I covered the account, group, and home-directory output rather than publishing those identifiers.
+
+![The elevated identity check returned root](../pictures/linux-sudo-access.png)
 
 ## Host Hardening
 
@@ -50,7 +53,9 @@ I disabled root/password-based SSH access, retained public-key access, reduced a
 
 The host firewall was enabled with restrictive incoming defaults and explicit lab allowances. Cloud and host firewall rules were treated as separate layers.
 
-> Screenshot upload pending: `pictures/linux-security.png`
+![SSH and firewall checks with identifying details covered](../pictures/linux-security.png)
+
+The image includes the initial firewall state and the final enabled state after configuration.
 
 ### SSSD responder repair
 
@@ -62,7 +67,9 @@ The follow-up checks showed no failed units, working directory lookups, and a su
 
 This was a host-specific correction, not a universal recommendation to remove responder settings from every SSSD deployment.
 
-> Screenshot upload pending: `pictures/sssd-fix.png`
+![Failed responder units before the SSSD repair](../pictures/sssd-error.png)
+
+This is the failure I investigated. The successful follow-up checks were confirmed during the session, but their screenshot was not in the supplied folder. I have reserved `pictures/sssd-fix.png` for a later capture.
 
 ## Internal Help Desk Portal
 
@@ -103,11 +110,11 @@ A practical correction was recognizing the shell boundary: Windows PowerShell sy
 
 The application service was enabled and verified, and the backend listener was checked before configuring the proxy.
 
-> Screenshot upload pending: `pictures/helpdesk-service.png`
+![Database checks, active service, and successful application health response](../pictures/helpdesk-service.png)
 
-I tested proxy configuration before reloading it, applied restricted lab access, and opened the portal from the Windows client. A fictional ticket was created and updated successfully; the browser milestone was captured for later sanitized upload.
+I tested proxy configuration before reloading it, applied restricted lab access, and opened the portal from the Windows client. I created and updated a fictional ticket to check the workflow.
 
-> Screenshot upload pending: `pictures/helpdesk-portal.png`
+![The portal with a fictional ticket and updated status](../pictures/helpdesk-portal.png)
 
 ### Restart and gateway-error investigation
 

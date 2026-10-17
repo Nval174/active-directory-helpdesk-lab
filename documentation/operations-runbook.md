@@ -66,7 +66,8 @@ There is no configured retention deletion yet. An integrity pass proves structur
 - [ ] Add health/backup-failure monitoring and log-review practice.
 - [ ] Add application authentication/authorization and encrypted web transport before widening use.
 - [ ] Perform negative access tests and review older broad connectivity allowances.
-- [ ] Upload sanitized [milestone screenshots](evidence-notes.md#linux-milestone-placeholders).
-- [ ] Separately review existing repository images and earlier history for sensitive information.
+- [x] Review and redact the supplied screenshots and earlier repository history.
+- [x] Add the available [milestone screenshots](evidence-notes.md#linux-milestones).
+- [ ] Capture successful SSSD repair checks as `sssd-fix.png`.
 
 Only fictional records belong in the prototype. Network reachability is not a substitute for application permission controls.

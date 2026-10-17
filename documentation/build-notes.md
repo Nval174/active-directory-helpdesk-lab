@@ -66,7 +66,7 @@ This proves backup creation, not restoration or off-instance recovery.
 
 ## Current Checkpoint
 
-The domain foundation, Linux identity integration, host hardening, portal, and manual backup are working. New screenshot uploads are pending.
+The domain foundation, Linux identity integration, host hardening, portal, and manual backup are working. I added the available screenshots to the [screenshot index](../pictures/README.md). I still need a capture of the successful SSSD repair checks.
 
 See [Linux Operations](linux-operations.md) for details and [Operations Runbook](operations-runbook.md) for the next-session checklist.
 
@@ -78,4 +78,4 @@ See [Linux Operations](linux-operations.md) for details and [Operations Runbook]
 - Add monitoring and practical log review.
 - Improve application authentication/authorization and transport protection.
 - Review older connectivity allowances.
-- Upload only sanitized milestone screenshots.
+- Capture the successful SSSD repair checks at the next useful checkpoint.

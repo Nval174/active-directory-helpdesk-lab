@@ -66,4 +66,4 @@ Persistent timers can catch up after downtime but cannot execute while the host 
 
 I keep screenshots at meaningful milestones instead of recording every click. Public summaries should explain the technical reasoning without exposing credentials or live connection details.
 
-The latest text has been sanitized. Existing images and earlier Git history are separate review items; this edit does not erase them.
+I reviewed the screenshot folder alongside the repository history, then replaced identifying text and image versions. I also learned to check what a capture actually proves: the SSSD image showed the original failure, so I kept the successful repair capture pending. The [evidence notes](evidence-notes.md) record these limits.

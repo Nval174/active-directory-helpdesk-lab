@@ -20,6 +20,8 @@ I unlocked the account and tested sign-in with the correct credentials. The user
 
 ## Lesson
 
-Confirm the account state, identify the cause, make the smallest required administrative change, and verify successful authentication afterward.
+I learned to confirm the account state, identify the cause, make the smallest required administrative change, and verify successful authentication afterward.
 
-Historical evidence files remain in the repository; see [Evidence Notes](../documentation/evidence-notes.md) for their review status.
+## Evidence
+
+I kept the redacted [policy capture](../pictures/account-lockout-policy.png), [sign-in message](../pictures/account-lockout-message.png), and [locked-account state](../pictures/account-locked.png). They record the original exercise; I have withheld exact policy values because the historical notes and capture differ. See [Evidence Notes](../documentation/evidence-notes.md).

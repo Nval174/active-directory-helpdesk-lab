@@ -35,6 +35,8 @@ Live server names, resource paths, identity/group names, and test-file names are
 
 ## Lesson
 
-Successful sign-in does not imply permission to every resource. Check both group membership and the resource's own access controls before changing the account.
+I learned that successful sign-in does not imply permission to every resource. I now check both group membership and the resource's own access controls before changing the account.
 
-Historical evidence files remain in the repository; see [Evidence Notes](../documentation/evidence-notes.md).
+## Evidence
+
+I kept the redacted [access-denied capture](../pictures/resource-access-denied.png), [read-permission setting](../pictures/shared-resource-permissions.png), and [restored-access capture](../pictures/resource-access-restored.png). Identifying details are covered. See [Evidence Notes](../documentation/evidence-notes.md) for the review limits.

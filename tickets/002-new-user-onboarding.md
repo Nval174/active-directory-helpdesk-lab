@@ -10,10 +10,10 @@ Create a directory identity for a support employee and provide access appropriat
 
 ## Actions
 
-- Created the fictional account in the intended organizational location.
-- Assigned the support role through group membership.
-- Verified the account was enabled and available for domain authentication.
-- Confirmed unnecessary administrative memberships were absent.
+- I created the fictional account in the intended organizational location.
+- I assigned the support role through group membership.
+- I verified the account was enabled and available for domain authentication.
+- I confirmed unnecessary administrative memberships were absent.
 
 Live identity, group, and organizational names are omitted.
 
@@ -23,6 +23,8 @@ Directory administration tools and account queries confirmed the intended state.
 
 ## Lesson
 
-Provisioning is not complete until the identity, placement, membership, and effective access have been checked.
+I learned to check identity, placement, membership, and effective access before calling provisioning complete.
 
-Historical evidence files remain in the repository; see [Evidence Notes](../documentation/evidence-notes.md).
+## Evidence
+
+I kept the redacted [role assignment](../pictures/support-role-assignment.png), [group membership](../pictures/support-group-members.png), and [account check](../pictures/support-account-check.png). The [temporary elevation capture](../pictures/temporary-elevation.png) belongs to an earlier troubleshooting step; I removed that extra access during later revalidation. These images are historical, not proof of the current membership list. See [Evidence Notes](../documentation/evidence-notes.md).
