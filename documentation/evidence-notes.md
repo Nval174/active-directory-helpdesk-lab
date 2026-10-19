@@ -16,7 +16,32 @@ I keep screenshots at useful milestones rather than recording every command. I u
 
 The uploaded SSSD image shows the problem, not the fix. I recorded the successful repair from the follow-up results confirmed during the session. I will not rename the failure image to make it appear to prove success.
 
-I do not have screenshots here proving the completed restart/persistence checks or the manually tested backup. Those results come from the session record. I have not completed a restore exercise.
+I do not have screenshots here proving the completed restart/persistence checks, manually tested backup, or isolated restore. Those results come from the session record.
+
+### Recovery follow-up — October 17–18, 2026
+
+The isolated restore passed SQLite integrity checking. Source and restored copies each contained one ticket, with zero missing rows and zero extra rows in full-row comparisons. The live database was not overwritten.
+
+After all three instances were brought back online, the supplied checks showed the Linux identity, proxy, and application services active; valid directory trust; synchronized time; successful direct/proxied database health; and no failed Linux units. I also confirmed in the Windows browser that the existing ticket remained present.
+
+The subsequent session results established these additional checkpoints:
+
+| Check | Supplied result and scope |
+|---|---|
+| Local retention | Updated systemd job succeeded with a zero exit status; the installed policy keeps 14 completed copies |
+| S3 database round trip | Encryption, versioning, upload checksum, exact downloaded bytes, SQLite integrity, matching ticket count, and anonymous-access denial passed |
+| Cloud lifecycle | Daily, latest-recovery, and validation policies inspected; unrelated rules preserved and public access blocking/versioning retained |
+| Upload-hook repair | The observed timer activation initially ran only the local backup; the missing hook was restored and three subsequent manual complete-job runs verified both S3 copies |
+| Application/configuration archive | 14 application files preserved; all 36 archived files restored and verified after private S3 readback |
+| Recovered-source application | Actual recovered source passed 12 recovery checks and four original regression tests; the isolated ticket count changed from one to two while live database contents stayed unchanged |
+| Post-drill live health | Application and proxy active; database health successful |
+| Replacement-host preparation | Image/network/key-name checks and IAM simulation passed; two object versions pinned; EC2 launch permission dry run passed; no instance launched |
+
+The recovered-source drill used the existing host's Python environment after checking the recorded dependency inventory. It does not establish fresh dependency installation, a complete proxy/backend rebuild, or replacement-host browser access. The archived configuration deliberately excluded the live secret and machine credentials.
+
+A shell paste-footer error appeared after the recovered-source PASS output. I checked the original block and investigated delimiter concatenation, then verified live service health. I kept the application test result separate from the failed trailing shell command.
+
+These results come from the session's terminal output and confirmations. No new recovery screenshots or public raw reports are added here. See the [backup and recovery record](backup-and-recovery.md) for the full sequence and remaining work.
 
 ## Screenshot Review
 
@@ -36,10 +61,11 @@ This review covers the files and history included in this repository. It does no
 
 ## What Remains Unverified
 
-- A database integrity check does not prove a successful restore or recovered records.
-- An enabled timer and successful manual backup do not prove a future unattended run.
+- The database and recovered-source application drills passed; a full replacement-host rebuild and fresh dependency installation remain untested.
+- The repaired S3 hook passed manual complete-job runs; a later unattended activation with it loaded has not yet been observed.
+- The preparation dry run checks launch permissions; it does not prove instance capacity, successful boot, application readiness, or a measured rebuild time.
 - A successful request from the intended client does not prove that every disallowed source is blocked.
 - Linux directory membership does not provide web-application authentication or authorization.
-- Service restarts do not replace a complete instance stop/start recovery test.
+- The instance restart follow-up passed the listed readiness and persistence checks; it did not repeat every Windows policy or disallowed-access test.
 
-I will add the missing SSSD capture and a restore milestone only after carrying out those checks. I do not need extra screenshots for routine package installation, file transfer, or every restart.
+I will add the missing SSSD capture and any new recovery screenshots when they are available. Certificate services, intranet pages, and web single sign-on remain planned work in the [roadmap](roadmap.md). I do not need extra screenshots for routine package installation, file transfer, or every restart.

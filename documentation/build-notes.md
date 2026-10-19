@@ -30,7 +30,7 @@ A remote-access problem was traced to the effective logon-right assignment and r
 
 Temporary elevated access used during troubleshooting was removed.
 
-## Latest Session — October 16–17, 2026
+## Linux Build — October 16–17, 2026
 
 ### Foundation revalidation
 
@@ -64,17 +64,30 @@ I installed a scheduled SQLite backup job, manually triggered it, confirmed a co
 
 This proves backup creation, not restoration or off-instance recovery.
 
+## Recovery Session — October 17–18, 2026
+
+I restored a local backup into an isolated database and compared full ticket rows: one ticket in each copy, no missing or extra rows. After bringing the three lab instances back online, service, trust, time, database-health, and Windows browser persistence checks passed.
+
+I then added 14-copy local retention and private S3 storage using an instance role. Database uploads/downloads passed encryption, versioning, checksum, exact-byte, integrity, ticket-count, and anonymous-access-denial checks. Cloud lifecycle rules were applied and inspected without replacing unrelated rules.
+
+An observed timer run exposed a missing S3 upload hook. I repaired the loaded service configuration and verified three complete manual backup jobs afterward. I still need to observe a later unattended activation with that hook loaded.
+
+I created a separate application/configuration snapshot with 14 application files and 36 archived files total. The live secret and machine credentials were excluded. Private S3 readback and all restored file hashes passed. Using the actual recovered code and a disposable restored database, 12 recovery checks and four original regression tests passed; live data stayed unchanged.
+
+Finally, I prepared a separate recovery host. Exact image/network checks, a restricted recovery-role policy simulation, and an EC2 launch permission dry run passed. Two backup object versions are pinned for the drill. The host has not been launched, and the full new-host web deployment remains pending.
+
+The [backup and recovery record](backup-and-recovery.md) distinguishes these live results from fixture tests and the remaining rebuild work.
+
 ## Current Checkpoint
 
-The domain foundation, Linux identity integration, host hardening, portal, and manual backup are working. I added the available screenshots to the [screenshot index](../pictures/README.md). I still need a capture of the successful SSSD repair checks.
+The domain foundation, Linux identity integration, host hardening, portal, local retention, and private cloud backups are working. Database restoration, configuration-file restoration, and recovered-source application checks passed. A separate recovery host is prepared but not launched. I added the available screenshots to the [screenshot index](../pictures/README.md); the successful SSSD repair capture and new recovery captures remain outstanding.
 
 See [Linux Operations](linux-operations.md) for details and [Operations Runbook](operations-runbook.md) for the next-session checklist.
 
 ## Next Up
 
-- Test restoration into a separate database.
-- Validate a full instance stop/start cycle.
-- Add retention and off-instance backup protection.
+- Launch the prepared recovery host and verify a complete rebuild with fresh dependencies and browser access.
+- Observe a later unattended backup with the repaired cloud hook loaded.
 - Add monitoring and practical log review.
 - Improve application authentication/authorization and transport protection.
 - Review older connectivity allowances.

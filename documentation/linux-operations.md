@@ -1,6 +1,6 @@
 # Linux IT Operations Extension
 
-Build session: **October 16–17, 2026**. This public record explains methods and verified outcomes without publishing live infrastructure or identity details.
+Build session: **October 16–17, 2026**. Recovery follow-up: **October 17–18, 2026**. This public record explains methods and verified outcomes without publishing live infrastructure or identity details.
 
 ## Phase 0 — Brief Foundation Check
 
@@ -135,23 +135,55 @@ The backup job uses SQLite's backup mechanism instead of a plain copy of an acti
 | Backup script | Administratively owned with restrictive permissions |
 | Backup service | Manual activation succeeded |
 | Timer | Enabled, active, and listed with a next run |
-| Produced copy | Present and integrity-checked |
+| Produced copies | Present and integrity-checked; updated job retains the newest 14 completed copies |
 | Schedule handling | UTC-based with a randomized delay and persistent catch-up behavior |
-| Restoration | Not yet tested |
+| Restoration | Isolated copy passed integrity and record comparisons; live database unchanged |
 
 Exact backup paths and timing are omitted from this public record.
 
-Important limitations:
+I updated the local job to use Python's SQLite online backup API, temporary staging, atomic publication, and an exclusive lock. It validates all copies selected for retention before pruning older recognized backups. The first inspected retention run found three copies, kept three, and removed none; later runs accumulated more copies while still below the retention threshold. Local fixtures exercised expiration and failure cases without deleting live backups.
 
-- Copies are local to the same instance/storage, not off-instance disaster recovery.
+### Private S3 backup and retention
+
+I installed the AWS CLI after verifying its signature and attached a backup role to the application host. Uploads use temporary instance-role credentials. The private bucket has public access blocking, server-side encryption, and versioning enabled.
+
+The uploader verifies a dated database snapshot and a separate latest recovery object using size, SHA-256, encryption, and version metadata. Downloading a copy produced an exact byte match; the restored database passed integrity and ticket-count checks. Anonymous object access was denied.
+
+Cloud lifecycle rules now cover daily snapshots, old latest-recovery versions, and disposable validation copies. The current latest recovery object has no date-based expiration. I preserved unrelated rules and rechecked public access blocking and versioning after the change.
+
+The first observed timer activation created only a local copy. Inspecting the loaded service showed the S3 upload hook was missing. I restored the drop-in, confirmed it was loaded, and verified three complete manual service runs, including fresh status records. A later unattended run with the repaired hook loaded remains pending.
+
+Recovery boundaries:
+
+- Local copies remain on the application host; verified S3 copies provide separate storage.
 - A stopped instance cannot execute backups; a persistent timer can catch up after startup.
 - UTC schedules do not remain at the same local clock time across daylight-saving changes.
-- Retention deletion is not configured yet.
+- The 14-copy local retention policy was tested with fixtures; the supplied live runs did not reach the expiration threshold.
 - Database copies do not include every host configuration item or the application secret.
-- Integrity checking does not prove useful records can be restored.
+- Integrity checking alone does not prove useful records can be restored; the separate restore below supplies that additional evidence.
+
+## Recovery Follow-Up
+
+I restored the existing backup into a separate temporary SQLite file and opened the source backup read-only for comparison. The restored file passed integrity checking. Both copies held one ticket, and full-row comparisons found zero missing rows and zero extra rows. I did not overwrite the live database.
+
+After bringing all three instances back online, I checked the identity service, proxy, application, directory trust, time synchronization, both database-health paths, and failed-unit list. The checks passed, and the existing ticket remained visible from the Windows client. These results come from the session output and browser confirmation; new screenshots have not been added.
+
+### Application/configuration recovery
+
+I inventoried the deployed sources, active service/proxy configuration, environment variable names, and Python dependencies. The later reviewed package preserved 14 application files and 36 archived files in total. It excluded the live secret, database, and machine credentials. Private S3 upload/download checks passed, and every restored archived file matched its recorded hash.
+
+An initial isolated application drill used the deployed code. I then repeated the meaningful application checks using the actual recovered sources, templates, and schema. The dependency inventory matched the existing Python environment. With a fresh test secret, isolated data, restricted execution, and recovered code held read-only, 12 recovery checks and four original regression tests passed. The live database's logical contents stayed unchanged. A subsequent live check confirmed active proxy/application services and successful database health.
+
+### Replacement-host preparation
+
+I prepared a separate recovery role restricted to two selected backup objects and their versions. IAM simulation allowed those reads and denied writes, deletes, and unrelated object reads. The preparation checked the exact Ubuntu image identity, SSH key name, subnet, route, and ingress rules, then passed an EC2 launch permission dry run.
+
+The image check initially rejected additional non-EBS mappings. I corrected it to locate the expected root EBS mapping by device name and permit recognized non-EBS entries while rejecting unexpected extra EBS disks. The revised preparation passed against the live image. The proposed recovery host has encrypted storage, IMDSv2, and Standard CPU credits; it has not been launched.
+
+These drills prove the listed backup, file-restoration, and recovered-source behaviors. They do not yet prove a fresh host, fresh dependencies, or a complete Gunicorn/Nginx/browser rebuild. The configuration package is a manual snapshot, separate from daily database backups. See the [detailed recovery record](backup-and-recovery.md).
 
 ## Next Milestone
 
-The next task is an isolated restore: recover a copy into a separate file and compare ticket contents without replacing the live database.
+Launch the separate recovery host and rebuild from the selected backup versions with fresh dependencies and a new application secret. Keep its backup timer/uploader disabled, test the complete web workflow, and confirm the original service and data stay unchanged. Then follow the planned certificate, intranet, and domain sign-in extension before automating the expanded configuration.
 
-See [Operations Runbook](operations-runbook.md) and [Evidence Notes](evidence-notes.md).
+See the [Roadmap](roadmap.md), [Operations Runbook](operations-runbook.md), and [Evidence Notes](evidence-notes.md).

@@ -8,15 +8,16 @@ I use generic labels in this writeup and cover identifying details in screenshot
 
 ## Current Status
 
-**The Windows domain, Linux domain membership, internal portal, and scheduled local database backups are working.**
+**The Windows domain, Linux domain membership, and internal portal are working. Local and private cloud backups have passed restoration checks, including tests using the recovered application source.**
 
-Latest build session: **October 16–17, 2026**.
+Latest build session: **October 16–17, 2026**. Recovery checks and roadmap review: **October 17–18, 2026**.
 
 | Component | Role | Verified result |
 |---|---|---|
 | Windows domain controller | Directory services and DNS | Domain and DNS checks passed |
 | Windows lab client | Domain member and portal browser | Intended access and portal workflow tested |
 | Linux lab server | Ubuntu LTS, directory integration, internal application | Identity integration and portal working |
+| Backup and recovery | Local SQLite copies, private S3 storage, and an application/configuration package | Database restoration, file restoration, and recovered-source application checks passed |
 
 The new laptop can support smaller local labs, but this project remains on AWS to practice cloud networking and use the existing environment.
 
@@ -32,8 +33,16 @@ The new laptop can support smaller local labs, but this project remains on AWS t
 - Deployed an internal help-desk portal using Nginx, Gunicorn, Flask, and SQLite under a non-login service account.
 - Verified ticket persistence after service restarts and checked both application and proxy health paths.
 - Created a daily systemd backup timer and successfully tested backup creation and database integrity.
+- Restored a backup into an isolated database: integrity passed, both copies contained one ticket, and comparisons found no missing or extra rows.
+- Rechecked services, directory trust, time synchronization, database readiness, and browser ticket persistence after bringing all three instances back online.
+- Installed a 14-copy local retention policy and verified successful backup jobs through systemd.
+- Added role-based uploads to private, encrypted, versioned S3 storage; verified downloads, checksums, database restoration, anonymous-access denial, and lifecycle rules.
+- Found a missing S3 upload hook in the loaded backup service, restored it, and verified three complete manual service runs afterward.
+- Preserved 14 application files in a private configuration package and restored and verified all 36 archived files, excluding the live secret and machine credentials.
+- Tested the actual recovered application source against an isolated restored database: 12 recovery checks and four original regression tests passed; live database contents stayed unchanged.
+- Prepared a separate recovery host with restricted read permissions and two version-pinned backup objects. Launch permission checks passed; the host has not been launched.
 
-See the [Linux build record](documentation/linux-operations.md) for the implementation summary.
+See the [Linux build record](documentation/linux-operations.md) and the [backup and recovery session record](documentation/backup-and-recovery.md) for the implementation summary and verification limits.
 
 ![The internal help desk portal with a fictional sample ticket](pictures/helpdesk-portal.png)
 
@@ -46,6 +55,7 @@ I created and updated this fictional ticket to check the browser workflow. The b
 - Linux networking, SSSD/PAM, sudo, SSH, and host firewall management
 - Python/Flask, SQLite, virtual environments, and application deployment
 - Nginx reverse proxying, Gunicorn, systemd services and timers
+- S3 encryption/versioning, instance-role permissions, lifecycle rules, checksums, and isolated recovery drills
 - Layered troubleshooting, backup validation, and technical documentation
 
 ## Help Desk Scenarios
@@ -62,7 +72,11 @@ The portal's sample ticket is fictional application test data, not an additional
 
 This is a restricted learning prototype using fictional data, not a production-ready ticketing service. Operating-system directory membership does not provide web-application login or single sign-on.
 
-Application authentication/authorization, encrypted web transport, backup restoration testing, and off-instance backup protection remain follow-up work. A passing backup integrity check is not a completed restore exercise.
+Application authentication/authorization, encrypted web transport, repeatable deployment, and a full replacement-host rebuild remain follow-up work. The recovered-source application checks used the existing host's verified Python environment; installing fresh dependencies and testing the complete proxy/backend deployment on a new host are still pending.
+
+The timer was observed activating the backup service, but that run exposed the missing cloud upload hook. The repaired hook passed subsequent manual service runs; a later unattended run with it loaded has not yet been observed. The application/configuration package is a manual snapshot, separate from the scheduled database backups.
+
+The [roadmap](documentation/roadmap.md) adds a planned Windows certificate, company intranet, and domain sign-in extension after the recovery foundation. These features are not deployed yet.
 
 ## Documentation
 
@@ -70,7 +84,9 @@ Application authentication/authorization, encrypted web transport, backup restor
 - [AWS Networking](aws-networking/README.md)
 - [Build Notes](documentation/build-notes.md)
 - [Linux Operations Build](documentation/linux-operations.md)
+- [Backup and Recovery Results](documentation/backup-and-recovery.md)
 - [Operations and Next Session](documentation/operations-runbook.md)
+- [Roadmap and Planned Intranet](documentation/roadmap.md)
 - [Lessons Learned](documentation/lessons-learned.md)
 - [Evidence Notes](documentation/evidence-notes.md)
 - [Screenshot Index](pictures/README.md)
