@@ -1,31 +1,21 @@
 # Networking Notes
 
-This public edition omits live network ranges, addresses, identifiers, and detailed access rules.
+## Diagnostic Method
 
-## What I Learned
+I check the receiving service, initiating source, and failed layer before changing access rules.
 
-### Network boundaries and routing
+1. Verify addressing and the subnet's effective route table.
+2. Test the relevant DNS lookup or directory-service discovery.
+3. Check destination cloud rules and the host firewall separately.
+4. Confirm that the service is listening on the intended interface.
+5. Test the actual authentication or application workflow.
 
-A virtual network defines the lab's network boundary. Subnets divide its address space, and route tables determine forwarding. An internet gateway supplies a connectivity path; it is not, by itself, an access-control policy.
+A successful host lookup did not prove domain discovery: the original Windows join problem required correcting cloud firewall access. A shared subnet did not make that traffic automatically permissible.
 
-### Layered controls
+## Linux and Portal Checks
 
-Security groups and host firewalls are independent layers. A permitted cloud rule does not guarantee that the operating system accepts the connection, and a shared subnet does not mean all traffic is allowed.
+I made directory-aware DNS persistent, tested internal/external resolution and discovery, and rechecked behavior after reboot.
 
-### Direction matters
+The client reaches Nginx; Gunicorn listens on loopback. I checked direct backend health, proxied health, and the Windows browser workflow separately. This distinguished a brief startup-readiness failure from a persistent proxy problem.
 
-For an inbound rule, I identify the receiving system first and then the initiating source. This helped prevent confusing the directory server's rules with the Linux web server's rules.
-
-### DNS versus complete service reachability
-
-Name resolution, directory discovery, authentication, and application access are different tests. I worked through them separately instead of inferring complete health from one successful lookup.
-
-### Backend isolation
-
-The public-facing process in the logical application design is the reverse proxy. The application backend is bound to loopback and does not need its own network ingress allowance.
-
-## Linux Extension
-
-I made directory-aware DNS persistent, verified service discovery after reboot, and tested the portal from the intended lab client.
-
-The private configuration is kept outside this public summary. See [AWS Networking](../aws-networking/README.md) for the methods and [Architecture](architecture.md) for the role-based conceptual diagram.
+The [AWS networking record](../aws-networking/README.md) describes the verified network relationships and remaining access tests. Live connection details are kept in private notes.

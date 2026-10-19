@@ -1,114 +1,96 @@
 # Lab Roadmap
 
-Planning update: **October 17–18, 2026**. I keep completed results separate from planned features and omit live connection details from this public document.
+Checkpoint: **October 18, 2026**. This tracks the application I built, using the earlier Linux IT Operations phases. I chose a Flask/SQLite help-desk portal for phase 4 instead of the proposed health collector.
 
-## How This Fits the Earlier Plan
-
-My September Linux IT Operations roadmap used phases 0–3 for the foundation, phase 4 for a Python/SQL service, phase 5 for operations and recovery, phase 6 for automation, and phase 7 for final validation and documentation.
-
-I used a help-desk portal for phase 4 instead of the originally proposed health collector. The deployed service uses Flask, SQLite, Gunicorn, and Nginx. This roadmap follows the application I actually built.
-
-| Phase | Current position |
+| Phase | Position |
 |---|---|
-| 0–3: Foundation and directory integration | Implemented; see the build record for the exact checks and access-policy scope |
-| 4: Python/SQL application | Internal ticket workflow deployed and tested with fictional data |
-| 5: Operations and recovery | Local retention, private S3 backup/restore, configuration-package restoration, and recovered-source application checks passed; replacement-host launch preparation passed; full rebuild remains |
-| 5A–5C: Certificates, intranet, and domain sign-in | New planned extension; not deployed |
-| 6: Automation | Follow the validated manual configuration |
-| 7: Final review and portfolio | Repeat acceptance checks and publish sanitized evidence |
+| 0–3: Foundation and directory integration | Implemented with Linux access restricted to the administration role; checks recorded in the [build notes](build-notes.md) and [Linux operations](linux-operations.md) |
+| 4: Python/SQL service | Internal ticket workflow deployed and tested with fictional data |
+| 5: Operations and recovery | Database/configuration restoration and recovered-source tests passed; full new-host rebuild pending |
+| 5A–5C: Certificates, intranet, domain sign-in | Planned extension after recovery; not deployed |
+| 6: Automation | Automate the configuration that passes the manual checkpoints |
+| 7: Final validation and portfolio | Repeat acceptance checks and publish reviewed source/evidence |
 
 ## Finish the Recovery Foundation
 
-Before expanding the web service, I am completing these recovery checkpoints:
+- [x] Install and verify the 14-copy local backup policy.
+- [x] Verify private, encrypted, versioned S3 backups, database retrieval/restoration, and lifecycle rules.
+- [x] Restore the application/configuration package and dependency inventory, excluding the live secret and machine credentials.
+- [x] Test actual recovered source with isolated data and CSRF protection, then run the original regression tests.
+- [x] Prepare a restricted recovery role, pin backup versions, validate image/network settings, and pass the launch permission dry run.
+- [ ] Launch the replacement host, install fresh dependencies, generate a new secret, and rebuild Gunicorn/Nginx.
+- [ ] Verify Windows browser access and restart persistence without changing the live service/data; record full rebuild time.
+- [ ] Observe an unattended backup with the repaired cloud upload hook loaded.
+- [ ] Add service/backup-failure monitoring and practical log review.
+- [ ] Test denied web access and review the older broad connectivity allowance.
 
-- [x] Install and verify a 14-copy local backup policy.
-- [x] Store encrypted, versioned backups in private S3 storage and test download, checksum, and database restoration.
-- [x] Verify cloud retention rules and preserve the current latest recovery copy from date-based expiration.
-- [x] Back up and restore the reviewed application/configuration files and record dependency versions; exclude the live secret and machine credentials.
-- [x] Test the recovered application source against a disposable restored database with CSRF protection enabled, then run the original regression tests.
-- [x] Prepare a separate recovery role, select exact backup versions, validate the image/network configuration, and pass an EC2 launch permission dry run.
-- [ ] Launch the replacement host and install fresh dependencies from the recorded inventory.
-- [ ] Generate a fresh application secret and verify the complete Gunicorn/Nginx deployment from the Windows client without changing the live service.
-- [ ] Observe a later unattended database backup with the repaired S3 hook loaded.
-- [ ] Add useful service and backup-failure monitoring and repeat the acceptance checks before automation.
-
-The local database comparison found one ticket in each copy with no missing or extra rows. S3 readback and database checks passed. All 36 archived files were restored and verified, and the actual recovered source passed 12 recovery checks plus four original regression tests. The live database stayed unchanged.
-
-The replacement host has not been launched. The recovered-source drill reused the existing host's verified Python environment, so it does not yet prove a clean server rebuild or fresh dependency installation. See the [recovery session record](backup-and-recovery.md) for the evidence and remaining boundaries.
+The replacement host has not been launched. Existing recovered-source tests reused the verified Python environment; they do not prove a clean rebuild. Detailed results and retention rules are in [backup and recovery](backup-and-recovery.md); the [runbook](operations-runbook.md#next-recovery-drill) orders the next drill.
 
 ## Planned Intranet Extension
 
-I will insert this extension **after phase 5 and before phase 6**. It connects Windows certificate practice to the existing Linux application without treating host domain membership as web authentication.
+This sits after phase 5 and before automation.
 
-### 5A — Windows certificates and trusted HTTPS
+### 5A — Windows certificates and HTTPS
 
-**Goal:** Open the internal site over HTTPS with a certificate trusted by the lab client.
+**Goal:** The lab client trusts the internal site's HTTPS certificate.
 
-- Build a small private PKI using Active Directory Certificate Services (AD CS).
-- Learn the Windows certificate stores, certificate chain, certificate request, DNS subject alternative names, Server Authentication usage, and private-key permissions.
-- Limit certificate-template enrollment to the intended lab role; do not enable broad requestor-supplied identities or unnecessary enrollment services.
-- Issue a server certificate for the chosen internal DNS name and install it on the selected web front end.
-- Verify client trust and make the required certificate/revocation distribution locations reachable internally.
-- Document renewal, revocation, CA backup, and recovery. Keep CA keys and exported key material outside Git.
+- Build a private PKI with AD CS; practice certificate stores, chains, requests, DNS subject alternative names, Server Authentication usage, and key permissions.
+- Restrict template enrollment to the intended role and avoid broad requestor-supplied identities.
+- Install the server certificate on the chosen front end and provide reachable internal certificate/revocation distribution.
+- Test renewal/revocation and document CA backup/recovery; keep private keys outside Git.
 
-**Pass:** The intended hostname loads without a trust/name warning from the lab client. A wrong-name or untrusted certificate fails validation. Renewal works. Test revocation with explicit revocation checking and recorded client behavior; do not assume every browser blocks identically.
+**Acceptance:** The intended hostname loads without a trust/name warning; wrong-name and untrusted certificates fail. Verify renewal and explicit revocation-check behavior rather than assuming every browser handles revocation identically.
 
-### 5B — Company intranet homepage
+### 5B — Company homepage
 
-**Goal:** Give fictional employees a useful internal starting page.
+**Goal:** Fictional employees have an internal starting page linked to Help Desk.
 
-- Add a homepage with company announcements, support information, and a clear Help Desk entry.
-- Keep the ticket service on Linux; choose between a protected help-desk route or a separate protected internal site.
-- Preserve existing tickets and back up before any schema or deployment change.
-- Keep the draft homepage private while developing it; the complete intranet is not accepted until phase 5C passes.
+Add announcements, support information, and navigation while keeping the ticket service on Linux. Choose a protected route or separate internal site, back up before changes, and preserve existing tickets.
 
-**Pass:** Navigation, ticket links, form submissions, redirects, and error pages work under the chosen hostname/path. HTTPS works throughout. No new public web access is introduced.
+**Acceptance:** HTTPS, navigation, forms, redirects, and error pages work under the selected hostname/path. No new public web access is introduced. Access protection must also pass phase 5C.
 
 ### 5C — Domain sign-in and ticket permissions
 
-**Goal:** An approved domain user can use their Windows sign-in to enter the intranet and help desk; anonymous and unauthorized identities are denied.
+**Goal:** Approved domain users enter through Windows sign-in and receive role-appropriate access.
 
-My preferred Windows learning experiment is **IIS Windows Authentication on a domain-member web gateway**, with Kerberos verified in the browser/server session. The gateway can front the existing Linux application. I will validate the proxy, path handling, identity handoff, maintained component support, and protocol support in a small pilot before adopting this design.
+My preferred experiment is IIS Windows Authentication on a domain-member gateway in front of Linux. A pilot must verify component/proxy support, paths, identity handoff, and Kerberos before adopting it.
 
-- Disable anonymous access to protected content and explicitly authorize the intended AD group. A local Windows account must not satisfy the domain-only policy.
-- Configure DNS, the HTTP service identity/SPN, and the browser's internal-site sign-in policy for the selected hostname. Record the protocol actually negotiated; do not call an NTLM fallback a successful Kerberos test.
-- Protect the homepage, ticket pages, write operations, and any API/export endpoints with the same policy.
-- Restrict backend access to the authenticated gateway. Remove direct client paths that could bypass it.
-- Derive identity from the trusted authentication component and reject client-supplied identity headers. Do not put domain administrator credentials in the application or enable unconstrained delegation for this design.
-- Add server-side ticket ownership and role checks: employees work with their own tickets, support staff triage permitted tickets, and administration is a separate role.
-- Record authenticated identity, authorization outcome, and useful events without logging passwords, authentication tokens, or private keys.
+- Disable anonymous access and authorize the intended AD group. Configure DNS, service identity/SPN, and browser policy; record the actual protocol rather than counting NTLM fallback as Kerberos.
+- Apply access checks to the homepage, ticket pages, write operations, and API/export endpoints.
+- Restrict backend access to the gateway and reject client-supplied identity headers. Keep domain administrator credentials out of the application and avoid unconstrained delegation.
+- Enforce ticket ownership and separate employee, support, and administrative permissions on the server.
+- Log useful identity/authorization events without passwords, tokens, or keys.
 
-**Pass:** An allowed domain user enters through the Windows browser and gets the intended access. Anonymous requests, a local-only account, an excluded domain user, an employee accessing another employee's ticket, forged identity headers, and direct backend bypass are denied. Repeat new-session tests after removing group access and account for cached tickets/sessions. Verify behavior when the directory service is unavailable.
+**Acceptance:** Allowed users receive intended access. Deny anonymous requests, local-only accounts, excluded domain users, access to another employee's tickets, forged identity headers, and direct backend bypass. Retest after removing group access, account for cached sessions, and check directory-unavailable behavior.
 
-A trusted HTTPS server certificate authenticates the server and protects transport. It does not by itself prove which Windows user is visiting. Windows sign-in and AD-group authorization provide that user access boundary.
+A trusted server certificate protects transport and identifies the server; it does not identify the visiting Windows user.
 
-### Resource and Topology Decision Before Building
+### Resources and design decisions
 
-I plan to keep the certificate authority separate from the domain controller and web gateway, and keep the existing Windows client for testing. A dedicated CA and a dedicated IIS member gateway could add **two Windows instances**. I will check capacity, licensing, and cost before choosing or provisioning them.
+I plan to keep the CA separate from the domain controller and gateway, retaining the Windows client for tests. Dedicated CA and IIS roles could add two Windows instances. Capacity, licensing, and cost review must precede provisioning.
 
-If that footprint is too large, I can evaluate a supported Linux Kerberos gateway as an alternative front end. Existing Nginx does not acquire Windows single sign-on merely because the Linux host is domain joined. The implementation choice remains open until the pilot and resource review.
+A supported Linux Kerberos gateway remains an alternative if that footprint is too large. The pilot will decide the front end and validate proxy-to-backend transport. Certificate/revocation distribution needs narrow access independent of the protected homepage.
 
-Certificate distribution and revocation checking need their own narrow internal access rules; they must not depend on first authenticating to the protected employee homepage. Any proxy-to-application hop will use a documented, restricted transport boundary; I will decide and validate its TLS requirements during the pilot.
+Optional later experiments include certificate auto-enrollment, renewal failures, and user/device certificates. Requiring a managed device is a separate control from domain-user sign-in.
 
-### Optional Certificate Experiments After 5C
+## Automation and Publication
 
-I can later add certificate auto-enrollment, renewal troubleshooting, and user/device certificates. Requiring a managed device as well as an approved user is an additional control, such as validated client certificates with appropriate mapping. It is separate from signing into Windows with a domain account.
+After the manual checkpoints, automate the validated build with explicit secret/enrollment handling. Do not embed credentials in playbooks.
 
-## Then Automate and Revalidate
+Before completing the portfolio:
 
-For phase 6, automate only the configuration that passed the manual checkpoints. Handle enrollment and secrets explicitly; do not embed credentials in playbooks.
+- [ ] Publish reviewed, sanitized application source, original tests, deployment templates, and backup helpers. They are deployed or privately archived but are not currently versioned in this repository.
+- [ ] Repeat directory, client, application, permissions, TLS, backup/restore, and restart checks.
+- [ ] Capture the missing SSSD repair evidence and useful recovery milestones.
+- [ ] Update the architecture only when new roles are deployed; keep test data fictional.
 
-For phase 7, repeat directory, client, application, permission, TLS, backup/restore, and restart checks. Update the architecture diagram only after the new roles are actually deployed, and document controlled failure/recovery scenarios with fictional data.
-
-The private cybersecurity study planner is a separate application. This intranet experiment does not change its audience or monthly learning review.
+The private cybersecurity study planner is a separate application.
 
 ## References
 
 Microsoft documentation reviewed October 18, 2026:
 
-- [Active Directory Certificate Services overview](https://learn.microsoft.com/en-us/windows-server/identity/ad-cs/active-directory-certificate-services-overview)
+- [AD CS overview](https://learn.microsoft.com/en-us/windows-server/identity/ad-cs/active-directory-certificate-services-overview)
 - [IIS Windows Authentication](https://learn.microsoft.com/en-us/iis/configuration/system.webserver/security/authentication/windowsauthentication/)
 - [IIS URL authorization](https://learn.microsoft.com/en-us/iis/configuration/system.webserver/security/authorization/)
-- [Server certificate deployment overview](https://learn.microsoft.com/en-us/windows-server/networking/core-network-guide/cncg/server-certs/server-certificate-deployment-overview)
-
-See the [build record](linux-operations.md), [operations runbook](operations-runbook.md), and [evidence notes](evidence-notes.md) for completed work and its limits.
+- [Server certificate deployment](https://learn.microsoft.com/en-us/windows-server/networking/core-network-guide/cncg/server-certs/server-certificate-deployment-overview)

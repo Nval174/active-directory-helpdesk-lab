@@ -4,39 +4,20 @@
 **Category:** Authorization / Shared Resource  
 **Status:** Resolved
 
-## Issue
+## Issue and Investigation
 
-The employee could authenticate but received Access Denied when opening a shared support resource.
+The employee could sign in but received Access Denied when opening a shared support resource.
 
-## Investigation
+I verified role-group membership, then inspected share and filesystem permissions. The relevant NTFS group permission had been removed to simulate the failure.
 
-I verified the role-group membership, then inspected the resource's filesystem permissions. The relevant group permission had been removed during the deliberately simulated failure.
+## Resolution and Verification
 
-This isolated the issue to resource authorization rather than the account's authentication.
-
-## Resolution
-
-I restored the required read-level permission through the role group. No unnecessary write or full-control access was added.
-
-## Verification
-
-The employee could open the resource and read its test file again.
-
-## Troubleshooting Sequence
-
-1. Confirm authentication.
-2. Verify intended role membership.
-3. Inspect share/filesystem permissions.
-4. Identify the missing permission.
-5. Restore minimum required access.
-6. Retest from the user's session.
-
-Live server names, resource paths, identity/group names, and test-file names are omitted.
+I restored the required read-level permission through the role group. The employee could open the resource and read its test file again; no unnecessary write or full-control access was added.
 
 ## Lesson
 
-I learned that successful sign-in does not imply permission to every resource. I now check both group membership and the resource's own access controls before changing the account.
+Successful sign-in does not imply resource access. I check group membership and the resource's own permissions before changing the account.
 
 ## Evidence
 
-I kept the redacted [access-denied capture](../pictures/resource-access-denied.png), [read-permission setting](../pictures/shared-resource-permissions.png), and [restored-access capture](../pictures/resource-access-restored.png). Identifying details are covered. See [Evidence Notes](../documentation/evidence-notes.md) for the review limits.
+The redacted captures show [access denied](../pictures/resource-access-denied.png), [share permissions](../pictures/shared-resource-permissions.png), [NTFS permissions](../pictures/share-filesystem-permissions.png), and [restored access](../pictures/resource-access-restored.png). See [Evidence Notes](../documentation/evidence-notes.md) for the review limits.

@@ -1,47 +1,30 @@
 # AWS Networking
 
-This public summary describes the networking skills demonstrated by the lab. Live addressing, cloud resource identifiers, internal names, administrative source addresses, and exact rule sets are intentionally omitted.
+I created the lab's virtual network, subnet allocations, internet gateway, and routing. An availability-zone constraint required adjusting the compute deployment location. The Windows systems and Linux extension use the existing compute subnet.
 
-## Foundation
+Live addresses, resource IDs, internal names, administrative source addresses, and exact rule sets are omitted.
 
-I created a virtual network with separate subnet allocations, an internet gateway, and routing. An availability-zone constraint required adjusting the compute deployment location.
+## Verified Relationships
 
-The Windows systems and added Linux server use the existing compute network. The Linux addition did not require a new VPC or local virtual machine.
+| Destination | Intended source or path |
+|---|---|
+| Directory services | Lab systems requiring DNS, discovery, and authentication |
+| Linux web proxy | Intended Windows lab client |
+| Administrative services | Restricted administration source |
+| Application backend | Loopback connection from the proxy |
 
-## Security-Group Direction
+Cloud security groups and the Linux host firewall enforce separate controls. I checked the compute subnet's explicit route-table association rather than assuming the VPC's main table applied. Its internet-gateway route supplies a path; it does not authorize inbound traffic.
 
-A useful lesson was identifying the destination resource and the initiating source separately:
+Directory-aware DNS persisted across reboot, and the portal worked from the intended Windows client. Negative web-access tests and review of an older broad directory connectivity allowance remain pending.
 
-- Directory traffic from Linux is permitted at the directory server's boundary.
-- Browser traffic from the lab client is permitted at the web server's boundary.
-- Administrative traffic is narrowly scoped rather than opened to all sources.
-- A Linux host firewall enforces another layer of restrictions.
-- The application backend stays on loopback behind its reverse proxy.
+## Historical Captures
 
-These are logical relationships, not a disclosure of the deployed access-control matrix.
+These images record the original setup, not a current network inventory.
 
-## DNS and Service Discovery
+![Virtual-network setup](../pictures/network-vpc.png)
 
-Linux was configured to use directory-aware DNS persistently. Tests covered directory-service discovery, internal resolution, external resolution, and behavior after reboot.
+![Subnet setup](../pictures/network-subnet.png)
 
-A successful host lookup alone was not treated as proof that domain discovery or authentication would work.
+![Route-table setup](../pictures/network-route-table.png)
 
-## Limitations and Follow-Up
-
-- Public routing does not mean unrestricted ingress; firewall controls still matter.
-- Shared-network placement does not bypass host or cloud security controls.
-- Positive application access was tested; negative tests from disallowed sources remain pending.
-- An older broad lab connectivity allowance remains for later review.
-- Any future changes to features, membership, or addressing require a fresh connectivity review.
-
-## Historical Network Evidence
-
-I kept these captures from the original build and covered the identifying details. They show the setup workflow, not a current network inventory.
-
-![Original virtual-network setup](../pictures/network-vpc.png)
-
-![Original subnet setup](../pictures/network-subnet.png)
-
-![Original route-table setup](../pictures/network-route-table.png)
-
-See [Architecture](../documentation/architecture.md), [Linux Operations](../documentation/linux-operations.md), and [Evidence Notes](../documentation/evidence-notes.md) for the current build record and review scope.
+See the [architecture](../documentation/architecture.md), [diagnostic notes](../documentation/networking-notes.md), and [evidence notes](../documentation/evidence-notes.md).

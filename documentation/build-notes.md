@@ -1,94 +1,56 @@
 # Build Notes
 
-This is the public, sanitized record of what I built and verified. Operational identifiers and detailed access settings are intentionally omitted.
+This is my build sequence and the main troubleshooting outcomes. Live operational details are omitted.
 
 ## Original Windows Foundation
 
-### Network and compute
+### Network and directory
 
-I created an AWS virtual network, subnets, routing, and internet connectivity. An availability-zone/instance-type limitation required adjusting the deployment choice before the Windows systems could be launched.
+I created an AWS virtual network, subnet allocations, routing, and internet connectivity. An availability-zone/instance-type limitation required adjusting the deployment choice.
 
-### Active Directory and DNS
+I installed Active Directory and DNS, created a lab domain, and organized fictional users and role groups. The client could resolve the directory server while domain discovery still failed. Checking DNS, directory health, discovery, and connectivity isolated the problem to cloud firewall access. Correcting that access allowed domain join.
 
-I installed directory services and DNS, created a lab domain, and organized fictional users and role groups.
+### Policy and remote access
 
-The client could eventually resolve the directory server, but domain-controller discovery still failed. I checked DNS, directory health, service discovery, and connectivity rather than assuming that name resolution proved all required traffic was working. Correcting cloud firewall connectivity allowed discovery and domain join to succeed.
+I joined the client, checked its computer object placement, and verified computer-side Group Policy. A remote-access problem required checking both effective logon rights and role membership. Correcting membership restored intended access.
 
-### Client policy and remote access
-
-I joined the client, placed its computer object in the intended organizational unit, and verified computer-side Group Policy. I learned that computer policy is not the same as a standard user's policy results.
-
-A remote-access problem was traced to the effective logon-right assignment and role membership. Correcting membership restored intended access without broadening the policy unnecessarily.
-
-### Support scenarios
-
-| Scenario | Work completed |
+| Support exercise | Verified outcome |
 |---|---|
-| Account lockout | Configured a lab policy, triggered a lockout, confirmed the state, unlocked the account, and verified sign-in |
-| User onboarding | Created a fictional identity, assigned the required role, and checked that unnecessary privileges were absent |
-| Shared-resource access | Isolated an access-denied problem to missing NTFS permissions and restored read-level access |
+| [Account lockout](../tickets/001-account-lockout.md) | Generated a lockout, confirmed it, unlocked the account, and tested sign-in |
+| [User onboarding](../tickets/002-new-user-onboarding.md) | Created the identity and checked role membership and unnecessary privileges |
+| [Resource access](../tickets/003-resource-access.md) | Restored missing NTFS read permissions and retested access |
 
-Temporary elevated access used during troubleshooting was removed.
+Temporary elevated access used for troubleshooting was removed during later revalidation.
 
-## Linux Build — October 16–17, 2026
+## Linux Extension — October 16–17, 2026
 
-### Foundation revalidation
+Before adding Linux, I rechecked Windows remote access, share access, and role membership. A live directory query exposed an organizational-unit mismatch in the older notes, which I corrected.
 
-I rechecked the Windows baseline before extending it. The useful outcomes were confirmed share access, intended allowed/denied remote-access behavior, removal of temporary elevated access, and correction of an organizational-unit mismatch in the documentation.
+I then:
 
-Detailed setup repetition is omitted; the new work focuses on Linux operations.
+1. Deployed Ubuntu 24.04 LTS with encrypted storage and hardened instance metadata settings.
+2. Configured persistent naming/DNS, checked resolution and time synchronization, and joined Active Directory.
+3. Verified identity resolution and machine trust, restricted Linux access by role, and tested sudo.
+4. Hardened SSH, tested a second key-based session, and enabled the host firewall.
+5. Repaired an SSSD responder/socket conflict and rechecked identities, trust, and failed units.
+6. Deployed Flask/SQLite through Gunicorn and Nginx under a dedicated service account.
+7. Tested the portal from Windows, created and updated a fictional ticket, and checked restart persistence.
+8. Installed and manually tested the scheduled SQLite backup job.
 
-### Linux infrastructure and identity
+A health request immediately after restarting the proxy and backend returned a gateway error. Both health paths succeeded after startup; the result was consistent with a readiness delay.
 
-1. Deployed Ubuntu LTS on AWS with encrypted storage and hardened instance metadata settings.
-2. Configured persistent naming and directory-aware DNS.
-3. Confirmed internal/external resolution and time synchronization.
-4. Created a dedicated directory location for Linux and completed domain membership.
-5. Validated SSSD identity resolution and machine trust.
-6. Restricted domain-account access by role, enabled home creation, and verified role-based sudo.
-7. Hardened SSH, retained a tested key-based administration path, and enabled the host firewall.
-
-### Service troubleshooting
-
-The main SSSD process was healthy, but responder units showed failures. I backed up and validated the configuration, corrected a responder/socket-activation conflict, and rechecked failed units, identity resolution, and machine trust.
-
-### Application deployment
-
-I deployed the tested starter portal through a reverse proxy and non-root backend service. The database was initialized under the application identity. Browser access was restricted to the intended lab workflow and a fictional ticket was created and updated.
-
-Immediately after a simultaneous proxy/backend restart, a health request returned a gateway error. Repeating both health paths after startup succeeded, consistent with a brief readiness delay. The sample ticket remained in the database.
-
-### Backups
-
-I installed a scheduled SQLite backup job, manually triggered it, confirmed a copy existed, and checked integrity. Timer enablement/activity and the next-run listing were also verified.
-
-This proves backup creation, not restoration or off-instance recovery.
+See [Linux operations](linux-operations.md) for the implementation and checks.
 
 ## Recovery Session — October 17–18, 2026
 
-I restored a local backup into an isolated database and compared full ticket rows: one ticket in each copy, no missing or extra rows. After bringing the three lab instances back online, service, trust, time, database-health, and Windows browser persistence checks passed.
+I restored and compared an isolated database, then rechecked services, trust, time, health, and Windows browser persistence after the three-instance restart cycle.
 
-I then added 14-copy local retention and private S3 storage using an instance role. Database uploads/downloads passed encryption, versioning, checksum, exact-byte, integrity, ticket-count, and anonymous-access-denial checks. Cloud lifecycle rules were applied and inspected without replacing unrelated rules.
+I added local retention and private S3 backups, verified cloud retrieval and restoration, and configured lifecycle rules. An observed timer run exposed a missing upload hook; the repair passed three complete manual service runs.
 
-An observed timer run exposed a missing S3 upload hook. I repaired the loaded service configuration and verified three complete manual backup jobs afterward. I still need to observe a later unattended activation with that hook loaded.
+I also restored an application/configuration package and tested the actual recovered sources against isolated data. Finally, I prepared a separate recovery host and passed its launch permission dry run without launching it.
 
-I created a separate application/configuration snapshot with 14 application files and 36 archived files total. The live secret and machine credentials were excluded. Private S3 readback and all restored file hashes passed. Using the actual recovered code and a disposable restored database, 12 recovery checks and four original regression tests passed; live data stayed unchanged.
+The [recovery record](backup-and-recovery.md) contains the counts, policies, test settings, and remaining limits. The full replacement-host rebuild and a later unattended backup after the hook repair remain open.
 
-Finally, I prepared a separate recovery host. Exact image/network checks, a restricted recovery-role policy simulation, and an EC2 launch permission dry run passed. Two backup object versions are pinned for the drill. The host has not been launched, and the full new-host web deployment remains pending.
+## Publication
 
-The [backup and recovery record](backup-and-recovery.md) distinguishes these live results from fixture tests and the remaining rebuild work.
-
-## Current Checkpoint
-
-The domain foundation, Linux identity integration, host hardening, portal, local retention, and private cloud backups are working. Database restoration, configuration-file restoration, and recovered-source application checks passed. A separate recovery host is prepared but not launched. I added the available screenshots to the [screenshot index](../pictures/README.md); the successful SSSD repair capture and new recovery captures remain outstanding.
-
-See [Linux Operations](linux-operations.md) for details and [Operations Runbook](operations-runbook.md) for the next-session checklist.
-
-## Next Up
-
-- Launch the prepared recovery host and verify a complete rebuild with fresh dependencies and browser access.
-- Observe a later unattended backup with the repaired cloud hook loaded.
-- Add monitoring and practical log review.
-- Improve application authentication/authorization and transport protection.
-- Review older connectivity allowances.
-- Capture the successful SSSD repair checks at the next useful checkpoint.
+I added the available milestone captures, redacted identifying material in the repository/history, and corrected commit identity to use GitHub's no-reply address. The [evidence notes](evidence-notes.md) list the missing captures; the [roadmap](roadmap.md) tracks remaining implementation work.
