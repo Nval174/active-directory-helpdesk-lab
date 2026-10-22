@@ -20,7 +20,7 @@ The portal uses fictional data. Application login, ticket permissions, and HTTPS
 ## Project records
 
 - [Architecture](documentation/architecture.md) and [AWS networking](aws-networking/README.md)
-- [Build timeline](documentation/build-notes.md) and [Linux configuration](documentation/linux-operations.md)
+- [Step-by-step overview](documentation/build-notes.md) and [Linux configuration](documentation/linux-operations.md)
 - [Backup and recovery results](documentation/backup-and-recovery.md) and [operations runbook](documentation/operations-runbook.md)
 - [Help desk tickets](tickets/README.md) and [lessons learned](documentation/lessons-learned.md)
 - [Screenshots](pictures/README.md) and [evidence notes](documentation/evidence-notes.md)
