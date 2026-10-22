@@ -1,11 +1,11 @@
 # Help Desk Tickets
 
-I use these fictional scenarios to record requests, investigation, actions, verification, and resolution. I omit the live lab's account identifiers, names, paths, and detailed policy values.
+I used fictional users to practice these support scenarios.
 
-| Ticket | Scenario | Status |
-|---|---|---|
-| [001 — Account Lockout](001-account-lockout.md) | Locked-account investigation and recovery | Resolved |
-| [002 — New User Onboarding](002-new-user-onboarding.md) | Identity creation and role assignment | Resolved |
-| [003 — Resource Access](003-resource-access.md) | Shared-resource permission troubleshooting | Resolved |
+| Ticket | Result |
+|---|---|
+| [001 — Account lockout](001-account-lockout.md) | Unlocked the account and verified sign-in |
+| [002 — New user onboarding](002-new-user-onboarding.md) | Created the account and checked role membership |
+| [003 — Shared resource access](003-resource-access.md) | Restored missing NTFS read permission and retested access |
 
-I reviewed and redacted the available screenshots. Their links are included with each ticket, and the [evidence notes](../documentation/evidence-notes.md) explain what the historical captures do and do not prove.
+The [evidence notes](../documentation/evidence-notes.md) explain the limits of the historical captures.

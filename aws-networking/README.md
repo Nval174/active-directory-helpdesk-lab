@@ -1,30 +1,30 @@
 # AWS Networking
 
-I created the lab's virtual network, subnet allocations, internet gateway, and routing. An availability-zone constraint required adjusting the compute deployment location. The Windows systems and Linux extension use the existing compute subnet.
+I created the VPC, subnet allocations, internet gateway, and routing. The directory server, Windows client, and Ubuntu server use the existing compute network.
 
-Live addresses, resource IDs, internal names, administrative source addresses, and exact rule sets are omitted.
+## Access paths
 
-## Verified Relationships
-
-| Destination | Intended source or path |
+| Destination | Configured or intended path |
 |---|---|
-| Directory services | Lab systems requiring DNS, discovery, and authentication |
-| Linux web proxy | Intended Windows lab client |
-| Administrative services | Restricted administration source |
-| Application backend | Loopback connection from the proxy |
+| Directory/DNS services | Lab systems requiring discovery and authentication |
+| Nginx | Intended Windows lab client |
+| Administration | Restricted administration source |
+| Gunicorn | Loopback connection from Nginx |
 
-Cloud security groups and the Linux host firewall enforce separate controls. I checked the compute subnet's explicit route-table association rather than assuming the VPC's main table applied. Its internet-gateway route supplies a path; it does not authorize inbound traffic.
+I checked the subnet's effective route-table association. Cloud security groups and the Linux firewall were checked separately. Directory-aware DNS survived reboot, and the intended client reached the portal.
 
-Directory-aware DNS persisted across reboot, and the portal worked from the intended Windows client. Negative web-access tests and review of an older broad directory connectivity allowance remain pending.
+Tests from disallowed web sources and review of an older broad directory-connectivity rule remain pending. The paths above are not a completed denial-test matrix.
 
-## Historical Captures
+## Troubleshooting order
 
-These images record the original setup, not a current network inventory.
+1. Check addressing, the effective route, and the relevant DNS/service-discovery query.
+2. Check the destination's cloud rules and host firewall.
+3. Confirm the listener and test the actual authentication/application workflow.
 
-![Virtual-network setup](../pictures/network-vpc.png)
+The original domain-join failure required correcting firewall access even though the directory-server name resolved. For the portal, I checked backend health, proxied health, and browser access separately.
 
-![Subnet setup](../pictures/network-subnet.png)
+## Historical captures
 
-![Route-table setup](../pictures/network-route-table.png)
+[Virtual network](../pictures/network-vpc.png) · [Subnet](../pictures/network-subnet.png) · [Route table](../pictures/network-route-table.png)
 
-See the [architecture](../documentation/architecture.md), [diagnostic notes](../documentation/networking-notes.md), and [evidence notes](../documentation/evidence-notes.md).
+These record the original setup. Live addresses and rule sources are omitted. See [architecture](../documentation/architecture.md) and [evidence notes](../documentation/evidence-notes.md).

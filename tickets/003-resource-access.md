@@ -1,23 +1,15 @@
 # Ticket 003 — Shared Resource Access Denied
 
-**Identity:** Fictional support employee  
-**Category:** Authorization / Shared Resource  
-**Status:** Resolved
+**Status:** Resolved · Fictional lab exercise
 
-## Issue and Investigation
+## Investigation and resolution
 
-The employee could sign in but received Access Denied when opening a shared support resource.
+The support employee could sign in but received Access Denied on a shared resource. I checked role membership and the share/filesystem permissions. The group's NTFS permission had been removed to simulate the failure.
 
-I verified role-group membership, then inspected share and filesystem permissions. The relevant NTFS group permission had been removed to simulate the failure.
-
-## Resolution and Verification
-
-I restored the required read-level permission through the role group. The employee could open the resource and read its test file again; no unnecessary write or full-control access was added.
-
-## Lesson
-
-Successful sign-in does not imply resource access. I check group membership and the resource's own permissions before changing the account.
+I restored read-level access through the group and confirmed that the employee could open the resource and read the test file. I did not add write or full-control access.
 
 ## Evidence
 
-The redacted captures show [access denied](../pictures/resource-access-denied.png), [share permissions](../pictures/shared-resource-permissions.png), [NTFS permissions](../pictures/share-filesystem-permissions.png), and [restored access](../pictures/resource-access-restored.png). See [Evidence Notes](../documentation/evidence-notes.md) for the review limits.
+[Access denied](../pictures/resource-access-denied.png) · [Share permissions](../pictures/shared-resource-permissions.png) · [NTFS permissions](../pictures/share-filesystem-permissions.png)
+
+Successful access was confirmed during the session. Its redacted capture did not retain a readable result and has been omitted. See [evidence notes](../documentation/evidence-notes.md).

@@ -1,41 +1,24 @@
 # Evidence Notes
 
-I describe completed work from the recorded session results and use screenshots only for what they visibly show. The [screenshot index](../pictures/README.md) lists the current captures; the [build notes](build-notes.md) summarize the sequence.
+I distinguish recorded session results from what the published files visibly establish.
 
-## Linux Milestones
+## Available evidence
 
-The available images show directory-account commands, an elevated identity check, effective SSH settings and firewall state, the original SSSD responder failure, application health, and the portal workflow.
+- The [screenshot index](../pictures/README.md) links 35 captures from the Windows/Linux build.
+- The [recovery record](backup-and-recovery.md) summarizes supplied terminal results and browser confirmations. Raw recovery output, application tests, configuration, and archives are not published here, so those results cannot yet be independently reproduced from this repository.
+- The SSSD failure is captured. Follow-up repair checks passed during the session, but `sssd-fix.png` is still missing.
+- Identity redactions hide some command output. The security capture includes both the initial inactive firewall and the final active state.
 
-The SSSD repair passed follow-up identity, trust, and failed-unit checks during the session. Its success capture, `pictures/sssd-fix.png`, is still missing; the failure image does not prove the repair.
+I omitted four captures whose redactions concealed the result: domain login, workstation policy linking, the shared folder, and restored share access. The successful access check remains a session result, not visible screenshot proof.
 
-The security image shows both the initial inactive firewall and its final active state. It also shows effective root/password SSH restrictions. Some identity output is covered, so the images cannot independently establish every reported account check.
+## Historical limits
 
-## Recovery Evidence — October 17–18, 2026
+Windows/network captures record earlier steps. They do not establish current memberships, policy application, or a complete rule inventory. Older lockout notes and a capture disagree on exact values; I have not inferred which is current.
 
-Database restore comparisons, instance restart checks, S3 verification, archive restoration, recovered-source application tests, and recovery-host preparation are recorded in the [backup and recovery record](backup-and-recovery.md). They come from terminal output and browser confirmations; no new recovery screenshots or raw reports have been published here.
+The recovery dry run and existing-environment tests do not establish a replacement-host rebuild.
 
-The application drill used recovered source and isolated data, with the existing dependency environment checked against the inventory. The live database stayed unchanged. This does not establish a full new-host rebuild, and manual backup jobs after the upload-hook repair do not prove a later unattended run.
+## Publication
 
-## Screenshot Review
+I keep live connection details, account identifiers, credentials, and private recovery material outside the public files. The screenshots use opaque redactions; their visible content was preserved outside the masks.
 
-I reviewed 39 current screenshots and one additional image version found only in earlier history. The images use role-based filenames.
-
-Redactions cover live addresses/ranges, cloud account/resource IDs, internal names, accounts/groups, private paths, and identifying window/browser content. I used opaque masks, exported flattened PNGs without the original metadata, verified masked pixels, and compared the unmasked image regions. Visual review and OCR supplied additional checks.
-
-I did not invent replacement output. Historical Windows/network captures do not prove current policy values, membership, or a complete access-rule inventory. Where lockout notes and a capture differed, I withheld the exact values.
-
-## Repository History and Source
-
-I replaced identifying screenshots and text across 77 earlier commits while preserving their sequence, parent relationships, and dates. The later recovery documentation commit uses GitHub's no-reply address for author and committer. External cached copies and clones may retain older material.
-
-The repository currently contains documentation and redacted images. The deployed application, tests, service/proxy templates, and backup helpers are not yet versioned here. Private recovery packages are separate; they exclude the live secret and machine credentials.
-
-## Remaining Evidence
-
-- A successful SSSD repair capture and useful recovery-drill captures
-- A fresh-host rebuild with fresh dependency installation, full web deployment, browser access, and measured recovery time
-- An unattended complete backup after the cloud-hook repair
-- Negative web-access tests and review of the older broad connectivity allowance
-- Reviewed, sanitized application/configuration source and tests
-
-The latest restart checks did not repeat every Windows policy or denied-access test. Application authentication, HTTPS, certificate services, and domain web sign-in remain planned work in the [roadmap](roadmap.md).
+The [roadmap](roadmap.md) tracks missing captures, source publication, and unfinished acceptance checks. Future PKI, intranet, VPN, and logging work is planned.
