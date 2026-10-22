@@ -1,49 +1,49 @@
 # Step-by-Step Lab Overview
 
-I built this lab to practice Windows and Linux administration, help desk support, and running a small application. This page follows the build from the initial AWS setup to the current recovery checkpoint, with a short explanation of what I did and why.
+I'm building a small workplace-style environment in AWS to practice managing Windows and Linux systems together. I started with a Windows domain, added a Linux server and a help desk portal, and then worked on backing up and recovering the application. Here's how the project has developed so far.
 
 Build checkpoint: **October 18, 2026**. Overview updated: **October 22, 2026**.
 
-1. **Created the AWS network.** I set up the virtual network, subnets, routing, and cloud firewall rules. This gave the lab machines a shared environment with controlled access.
+1. I started by setting up the network in AWS. That meant creating the network, subnets, routes, and firewall rules the machines would use. It gave me a place to connect the systems and control how they could be reached.
 
-2. **Built the Windows domain.** I configured a Windows directory/DNS server and joined a Windows client to the domain. This gave me central account management and a workstation for testing. When domain discovery failed, I corrected the firewall access needed for the join.
+2. Next, I built a Windows server running Active Directory and DNS, then joined a Windows client to the domain. This gave me central account management and a workstation for testing. I also corrected a firewall issue that initially prevented the join.
 
-3. **Created users and role groups.** I added fictional employee, help desk, and administrator accounts and groups. This let me practice giving people access based on their responsibilities.
+3. Once the domain was working, I created fictional users and groups for employees, help desk staff, and administrators. I wanted to practice assigning access by job role, instead of giving every account the same permissions.
 
-4. **Applied and checked Windows access policies.** I organized the client in the intended directory folder, applied Group Policy, and checked sign-in, remote access, and administrator membership. I also removed temporary elevation during later checks to keep the role boundaries clear.
+4. I then checked Group Policy, Windows sign-in, remote access, and administrator membership. I checked the client's organizational-unit placement and later removed temporary administrator access. This helped me see how account membership and policy affect what someone can do.
 
-5. **Worked through three help desk scenarios.** I unlocked an account, onboarded a new user, and restored access to a shared resource. These exercises connected the server setup to everyday support work.
+5. With those accounts in place, I worked through three support scenarios: an account lockout, onboarding a new user, and a shared-resource permission problem. This gave me practical problems to solve using the environment I'd built.
 
-6. **Added an Ubuntu server in AWS.** I launched a Linux server with encrypted storage and restricted administration access. This gave me a place to practice Linux and host the help desk portal.
+6. After that, I added an Ubuntu server in AWS. I used encrypted storage and restricted administration access. This became the Linux side of the project and the home for the help desk portal.
 
-7. **Configured Linux DNS and time.** I made sure Linux could find the Windows directory services and resolve external names, and that its clock was synchronized. I repeated DNS checks after reboot because domain authentication depends on reliable name resolution and time.
+7. Before joining Linux to the domain, I checked its DNS settings and clock. Authentication depends on finding the directory services and having synchronized time. I repeated the DNS checks after reboot to check that the settings would persist.
 
-8. **Joined Linux to the Windows domain.** I registered the Linux machine in Active Directory and checked domain-user and group lookups. I restricted Linux access to the administration role, tested excluded accounts, and verified the intended administrator could run elevated commands.
+8. I joined Ubuntu to Active Directory so it could recognize domain users and groups. I limited Linux access to the administration role, tested excluded accounts, and checked elevated commands. This connected the Windows and Linux sides through the same directory.
 
-9. **Hardened Linux remote access.** I disabled root and password SSH login, checked key-based access, and enabled the Linux firewall. This reduced the ways someone could connect to or administer the server.
+9. I tightened up Linux remote access by disabling root and password SSH login, checking key-based access, and enabling the host firewall. The aim was to give me a controlled way to administer the server.
 
-10. **Repaired the Linux authentication services.** Some supporting SSSD services failed even while the main service was active. I adjusted the configuration and rechecked services, identity lookups, and domain trust so the join was supported by working authentication services.
+10. Along the way, some supporting Linux authentication services failed even though the main SSSD service was running. I adjusted the configuration, then checked the failed services, user lookups, and domain trust again. It was a useful reminder to test the supporting services as well as the main one.
 
-11. **Deployed the help desk portal.** I installed the Python/SQLite application under a dedicated service account, used Gunicorn to run it, and put Nginx in front to handle web requests. I configured automatic service startup so the portal could run without an open terminal.
+11. Once the server was ready, I deployed the Python/SQLite help desk portal. I used a dedicated service account, Gunicorn to run the application, and Nginx to handle web requests. Automatic startup lets it run without an open terminal.
 
-12. **Tested the portal from Windows.** I created and updated a fictional ticket, checked the application and web-proxy health responses, and confirmed the ticket survived service and later instance restarts. This checked the user workflow as well as whether the services were running.
+12. I opened the portal from the Windows client and created and updated a fictional ticket. I checked the application's health responses and confirmed that the ticket remained after service and later instance restarts. That let me check the actual workflow as well as the server setup.
 
-13. **Added local database backups and tested a restore.** I configured validated backups, protection against overlapping runs, and retention of the newest 14 completed copies. I restored a separate database and compared its contents to check that the backup was usable.
+13. Then I worked on local database backups. I added validation, prevented overlapping backup runs, and set retention to keep the newest 14 completed copies. I restored a separate copy and compared its contents because I wanted to check that I could use the backup to recover data.
 
-14. **Added private backups in S3.** I used an instance role to upload encrypted, versioned cloud copies and configured retention rules. I downloaded a copy, checked its checksum and database contents, and tested anonymous-access denial to check both recovery and privacy.
+14. I added private S3 backups to keep a copy away from the application server, using role-based access, encryption, versioning, and retention rules. I downloaded a copy, checked its checksum and database contents, and confirmed that the tested object denied anonymous access.
 
-15. **Repaired the scheduled backup's upload connection.** The first observed scheduled run made a local backup but skipped S3. I restored the missing service hook and verified three complete manual runs. Observing a later unattended run is still pending.
+15. The first scheduled backup I observed exposed a gap: it made the local copy but skipped the S3 upload. I repaired the missing service hook and checked three complete manual runs. I still need to observe a later unattended run with that repair in place.
 
-16. **Backed up application files and tested recovered sources.** I archived selected application/configuration files and dependency information, excluding live secrets and the database. Restored file hashes matched, and 12 recovery checks plus four regression tests passed using isolated data and the existing Python environment.
+16. I also backed up selected application files, configuration, and dependency information, excluding live secrets and keeping the database backup separate. Restored file hashes matched, and recovered application checks passed with isolated data. These reused the existing Python environment; fresh dependency installation is still untested.
 
-17. **Prepared a separate recovery host.** I selected specific backup versions and checked the proposed image, network, and restricted recovery permissions. The launch dry run passed, but I have not launched or rebuilt that host yet; the purpose is to test recovery beyond the original server.
+17. From there, I prepared a separate recovery host, selecting specific backup versions and checking the image, network, and recovery permissions. The launch dry run passed, but I haven't launched the host yet. The next major test is rebuilding away from the original server.
 
-18. **Organized the portfolio records.** Throughout the build, I recorded results, collected milestone screenshots, and updated GitHub. I redacted identifying details and shortened the documentation so readers can follow the work and distinguish completed checks from plans.
+18. Throughout the project, I've kept notes, collected milestone screenshots, and updated this repository. I've also redacted identifying details and shortened the documentation. I want someone reading it to understand what I did, what I checked, and what still needs work.
 
-## Where I stopped
+## What comes next
 
-The Windows/Linux foundation, portal, and tested backup copies are in place. My next major step is a complete rebuild on a separate host with fresh dependencies, browser/restart checks, and a measured recovery time. I also need to observe an unattended backup after the upload repair and finish the remaining access checks.
+At this point, I have the Windows and Linux foundation, a working portal, and backup copies I've tested restoring. Next, I want to complete the separate-host rebuild with fresh dependencies, test browser access and restart behavior, and measure the recovery time. I also need to observe the repaired backup job running unattended and finish the remaining access checks.
 
-Certificates/HTTPS, an intranet page, website domain sign-in and ticket permissions, VPN access, centralized logging/syslog, and automation are planned extensions.
+After that, the roadmap includes certificates and HTTPS, an intranet page, domain sign-in and ticket permissions for the website, VPN access, centralized logging/syslog, and automation. Those are still planned additions.
 
-For the next tasks, see the [roadmap](roadmap.md). Supporting details are in [Linux configuration](linux-operations.md), [backup and recovery](backup-and-recovery.md), and the [operations runbook](operations-runbook.md).
+The [roadmap](roadmap.md) tracks the remaining work. More detailed records are in [Linux configuration](linux-operations.md), [backup and recovery](backup-and-recovery.md), and the [operations runbook](operations-runbook.md).
